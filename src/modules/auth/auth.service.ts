@@ -25,7 +25,13 @@ export async function login(email: string, password: string) {
     throw new Error('User password missing');
   }
 
-  const isValid = await bcrypt.compare(password, user.password);
+  
+  if (!user || !user.password) {
+  throw new Error('Invalid credentials');
+}
+
+ const isValid = await bcrypt.compare(password, user.password);
+
   console.log('PASSWORD VALID:', isValid);
 
   if (!isValid) {
@@ -37,13 +43,16 @@ export async function login(email: string, password: string) {
     role: user.role
   });
 
-  const refreshToken = generateOpaqueToken();
+const refreshToken = generateOpaqueToken();
 
-  await RefreshToken.create({
-    userId: user.id,
-    token: refreshToken,
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-  });
+await RefreshToken.create({
+  userId: user.id,
+  token: refreshToken,
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  isRevoked: false
+});
+
+
 
   return { accessToken, refreshToken };
 }

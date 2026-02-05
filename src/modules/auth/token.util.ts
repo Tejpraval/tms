@@ -34,3 +34,7 @@ export function signRefreshToken(
 export function generateOpaqueToken(): string {
   return crypto.randomBytes(64).toString('hex');
 }
+
+export function generateCsrfToken(): string {
+  return crypto.randomBytes(32).toString('hex');
+}

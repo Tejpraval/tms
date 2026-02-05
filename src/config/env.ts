@@ -18,5 +18,8 @@ export const ENV = {
   JWT_REFRESH_SECRET: required('JWT_REFRESH_SECRET'),
 
   ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY || '15m',
-  REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || '7d'
+  REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY || '7d',
+
+  COOKIE_NAME: process.env.COOKIE_NAME || 'refresh_token'
 };
+
