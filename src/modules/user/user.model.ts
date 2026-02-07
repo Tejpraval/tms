@@ -1,9 +1,27 @@
-import { Schema, model } from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
 
-const UserSchema = new Schema({
-  email: { type: String, unique: true },
-  password: String,
-  role: { type: String, enum: ['ADMIN', 'USER'], default: 'USER' }
+
+import { Role } from "../../constants/roles";
+
+export interface IUser extends Document {
+  email: string;
+  password: string;
+  role: Role;              // ✅ enum, not string union
+  tenantId?: mongoose.Types.ObjectId;
+}
+
+const UserSchema = new Schema<IUser>({
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: {
+    type: String,
+    enum: Object.values(Role), // ✅ enum-backed
+    required: true,
+  },
+  tenantId: {
+    type: Schema.Types.ObjectId,
+    ref: "Tenant",
+  },
 });
 
-export const User = model('User', UserSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);

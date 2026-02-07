@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\auth\auth.service.ts
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { ENV } from '../../config/env';
@@ -12,49 +13,36 @@ import { RefreshToken } from './refreshToken.model';
 import { signAccessToken, generateOpaqueToken } from './token.util';
 
 export async function login(email: string, password: string) {
-  console.log('LOGIN ATTEMPT:', email);
-
   const user = await User.findOne({ email });
-  console.log('USER FOUND:', !!user);
 
-  if (!user) {
-    throw new Error('User not found');
-  }
-
-  if (!user.password) {
-    throw new Error('User password missing');
-  }
-
-  
   if (!user || !user.password) {
-  throw new Error('Invalid credentials');
-}
+    throw new Error('Invalid credentials');
+  }
 
- const isValid = await bcrypt.compare(password, user.password);
-
-  console.log('PASSWORD VALID:', isValid);
+  const isValid = await bcrypt.compare(password, user.password);
 
   if (!isValid) {
     throw new Error('Invalid credentials');
   }
 
+  // 🔑 ACCESS TOKEN WITH tenantId
   const accessToken = signAccessToken({
     userId: user.id,
-    role: user.role
+    role: user.role,
+    tenantId: user.tenantId?.toString(),
   });
 
-const refreshToken = generateOpaqueToken();
+  const refreshToken = generateOpaqueToken();
 
-await RefreshToken.create({
-  userId: user.id,
-  token: refreshToken,
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-  isRevoked: false
-});
-
-
+  await RefreshToken.create({
+    userId: user.id,
+    token: refreshToken,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    isRevoked: false,
+  });
 
   return { accessToken, refreshToken };
 }
+
 
 

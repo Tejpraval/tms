@@ -1,3 +1,5 @@
+
+//D:\resumeproject\server\src\modules\tenant\tenant.controller.ts
 import { Request, Response } from 'express';
 import { Tenant } from './tenant.model';
 import {
@@ -5,6 +7,7 @@ import {
   updateTenantSchema
 } from './tenant.validation';
 
+import { logAudit } from "../audit/audit.service";
 /**
  * CREATE TENANT (ADMIN)
  */
@@ -70,3 +73,23 @@ export const deleteTenant = async (req: Request, res: Response) => {
 
   res.json({ success: true });
 };
+
+// src/modules/tenant/tenant.controller.ts
+export const getTenantById = async (req: Request, res: Response) => {
+  const tenant = await Tenant.findById(req.params.tenantId);
+
+  if (!tenant) {
+    return res.status(404).json({ message: "Tenant not found" });
+  }
+
+  await logAudit({
+    req,
+    action: "READ_TENANT",
+    resource: "TENANT",
+    resourceId: tenant.id,
+    outcome: "ALLOW",
+  });
+
+  res.json(tenant);
+};
+
