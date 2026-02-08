@@ -5,14 +5,47 @@ import { signAccessToken  , generateOpaqueToken} from './token.util';
 import { User } from '../user/user.model';
 import { ENV } from '../../config/env';
 import { generateCsrfToken } from './token.util';
+import bcrypt from "bcrypt"; 
+import { Role } from "../../constants/roles"; 
 
 export async function register(req: Request, res: Response) {
-  const user = await AuthService.register(req.body.email, req.body.password);
-  res.status(201).json({
-    _id: user._id,
-    email: user.email,
-    role: user.role
-  });
+  try {
+    const { email, password, role, tenantId } = req.body;
+
+    // 🔒 Basic validation
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required",
+      });
+    }
+
+    // 🔒 Role must exist
+    if (!role || !Object.values(Role).includes(role)) {
+      return res.status(400).json({
+        message: "Invalid or missing role",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      email,
+      password: hashedPassword,
+      role,          // ✅ THIS WAS MISSING
+      tenantId,      // ✅ optional but supported
+    });
+
+    await user.save();
+
+    return res.status(201).json({
+      message: "User registered successfully",
+    });
+  } catch (error) {
+    console.error("Register error:", error);
+    return res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
 }
 
 export async function login(req: Request, res: Response) {
