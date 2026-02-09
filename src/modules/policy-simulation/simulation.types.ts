@@ -2,6 +2,10 @@ import { Permission } from "../../constants/permissions";
 import { Role } from "../../constants/roles";
 import { AbacDecisionChange } from "./engine/abac.diff";
 /* ---------------- Simulation Change Types ---------------- */
+import {
+  ExplanationItem,
+  AuditStep,
+} from "./explain/explain.types";
 
 export enum SimulationChangeType {
   ROLE_PERMISSION_UPDATE = "ROLE_PERMISSION_UPDATE",
@@ -76,9 +80,24 @@ export interface UserAttributeUpdateChange {
 
 export interface UnifiedSimulationResult {
   rbac?: PolicySimulationResult;
+   
   abac?: {
     decisionChanges: AbacDecisionChange[];
   };
+
+  risk?: {
+    score: number;
+    severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+    factors: string[];
+  };
+
+  explanation?: {
+    summary: string;
+    details: ExplanationItem[];
+    auditTrail: AuditStep[];
+  };
+  simulationId?: string;
+
 }
 
 export interface UnifiedSimulationInput {

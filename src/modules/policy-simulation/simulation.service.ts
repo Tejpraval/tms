@@ -14,6 +14,14 @@ import {
 
 import { User } from "../user/user.model";
 import { Tenant } from "../tenant/tenant.model";
+import { scorePolicyRisk } from "./risk/risk.scorer";
+import { explainRbacDiffs } from "./explain/rbac.explainer";
+import { explainAbacChanges } from "./explain/abac.explainer";
+import { explainRisk } from "./explain/risk.explainer";
+import { AuditStep, ExplanationItem } from "./explain/explain.types";
+import { createApprovalFromSimulation } from "../policy-approval/approval.service";
+import { randomUUID } from "crypto";
+
 
 /**
  * Unified policy simulation (RBAC + ABAC)
@@ -80,6 +88,63 @@ result.rbac = diffAccessSnapshots(before, after);
       decisionChanges: diffAbacDecisions(before, after),
     };
   }
+   
+  const risk = scorePolicyRisk({
+  rbacDiffs: result.rbac?.diffs,
+  abacChanges: result.abac?.decisionChanges,
+   });
 
-  return result;
+   result.risk = risk;
+   
+  const explanation: ExplanationItem[] = [];
+const auditTrail: AuditStep[] = [];
+
+auditTrail.push({ step: "Simulation started", at: new Date().toISOString() });
+
+if (result.rbac) {
+  explanation.push(...explainRbacDiffs(result.rbac.diffs));
+  auditTrail.push({ step: "RBAC evaluated", at: new Date().toISOString() });
 }
+
+if (result.abac) {
+  explanation.push(...explainAbacChanges(result.abac.decisionChanges));
+  auditTrail.push({ step: "ABAC evaluated", at: new Date().toISOString() });
+}
+
+if (result.risk) {
+  explanation.push(...explainRisk(result.risk.factors));
+  auditTrail.push({ step: "Risk calculated", at: new Date().toISOString() });
+}
+
+result.explanation = {
+  summary: `Simulation completed with ${result.risk?.severity ?? "LOW"} risk`,
+  details: explanation,
+  auditTrail,
+};
+ 
+ // Generate immutable simulation ID
+const simulationId = randomUUID();
+
+result.simulationId = simulationId;
+
+// Create approval record (Phase 6.1)
+if (result.risk) {
+  await createApprovalFromSimulation({
+    tenantId: input.tenantId,
+    simulationId,
+    risk: {
+      score: result.risk.score,
+      severity: result.risk.severity,
+    },
+  });
+}
+
+
+
+  return result; 
+
+
+
+}
+
+
