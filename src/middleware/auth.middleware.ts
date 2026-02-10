@@ -1,24 +1,17 @@
-//D:\resumeproject\server\src\middleware\auth.middleware.ts
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { ENV } from '../config/env';
-import { JwtPayload } from "../modules/auth/auth.types"; // raw token type
-import { RequestUser } from "../types/request-user";
-// interface JwtPayload {
-//   userId: string;
-//   role: 'ADMIN' | 'USER';
-// }
+import { RequestHandler } from "express";
+import jwt from "jsonwebtoken";
 
-export function authMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+import { ENV } from "../config/env";
+import { JwtPayload } from "../modules/auth/auth.types";
+import { RequestUser } from "../types/request-user";
+
+const authMiddleware: RequestHandler = (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader?.split(" ")[1];
 
   if (!token) {
-    return res.sendStatus(401);
+    res.sendStatus(401);
+    return;
   }
 
   try {
@@ -27,16 +20,17 @@ export function authMiddleware(
       ENV.JWT_ACCESS_SECRET
     ) as JwtPayload;
 
-    // 🔑 Explicit mapping (this is the fix)
     const user: RequestUser = {
-      id: decoded.userId,     // map userId → id
+      id: decoded.userId,
       role: decoded.role,
-      tenantId: decoded.tenantId, // optional
+      tenantId: decoded.tenantId,
     };
 
-    req.user = user;
+    req.user = user; // ✅ correct
     next();
   } catch {
-    return res.sendStatus(401);
+    res.sendStatus(401);
   }
-}
+};
+
+export default authMiddleware;

@@ -1,10 +1,15 @@
-// src/types/express.d.ts
-import { RequestUser } from "./request-user";
+import { Role } from "../constants/roles";
 
 declare global {
   namespace Express {
+    interface User {
+      id: string;
+      role: Role;
+      tenantId?: string;
+    }
+
     interface Request {
-      user?: RequestUser;
+      user?: User;
     }
   }
 }

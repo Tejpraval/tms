@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { simulatePolicyController } from "./simulation.controller";
 
-import { authMiddleware } from "../../middleware/auth.middleware";
+import  authMiddleware  from "../../middleware/auth.middleware";
 import { requirePermission } from "../../middleware/requirePermission";
 import { Permission } from "../../constants/permissions";
 
