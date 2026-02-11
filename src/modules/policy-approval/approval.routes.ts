@@ -5,6 +5,7 @@ import {
   rejectSimulation,
 } from "./approval.controller";
 import authMiddleware from "../../middleware/auth.middleware";
+import { executePolicy } from "./execution.controller";
 
 const router = Router();
 
@@ -20,5 +21,12 @@ router.post(
   authMiddleware,
   rejectSimulation as RequestHandler
 );
+
+router.post(
+  "/execute",
+  authMiddleware,
+  executePolicy as RequestHandler
+);
+
 
 export default router;

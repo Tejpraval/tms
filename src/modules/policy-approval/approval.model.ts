@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { ApprovalStatus, ApprovalActorRole } from "./approval.types";
+import { SimulationChange } from "../policy-simulation/simulation.types";
 
 export interface PolicyApprovalDocument extends Document {
   tenantId: string;
@@ -11,6 +12,15 @@ export interface PolicyApprovalDocument extends Document {
   status: ApprovalStatus;
   decidedBy?: ApprovalActorRole;
   decidedAt?: Date;
+
+  // ✅ NEW
+  executedAt?: Date;
+
+  // ✅ NEW (this is critical for Phase 6.2)
+  metadata?: {
+    rbacChange?: SimulationChange;
+    abacChange?: any;
+  };
 
   createdAt: Date;
 }
@@ -39,11 +49,19 @@ const PolicyApprovalSchema = new Schema<PolicyApprovalDocument>(
     },
 
     decidedAt: { type: Date },
+
+    // ✅ ADD THIS
+    executedAt: { type: Date },
+
+    // ✅ ADD THIS
+    metadata: {
+      type: Schema.Types.Mixed,
+    },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-export const PolicyApproval = mongoose.model(
+export const PolicyApproval = mongoose.model<PolicyApprovalDocument>(
   "PolicyApproval",
   PolicyApprovalSchema
 );
