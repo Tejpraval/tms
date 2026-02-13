@@ -1,19 +1,19 @@
-// src/modules/policy-approval/execution.service.ts
-
+import mongoose from "mongoose";
 import { PolicyApproval } from "./approval.model";
-import { RBAC_MATRIX } from "../../constants/rbac";
-import { Role } from "../../constants/roles";
-import { Permission } from "../../constants/permissions";
 import { ExecutionResult } from "./execution.types";
 
+import { Policy } from "../policy-versioning/policy.model";
+import { PolicyVersion } from "../policy-versioning/policyVersion.model";
+import { invalidatePolicyCacheByPolicyId } from "../../utils/policyCache";
+
 /**
- * Apply approved simulation to live system
+ * Activate approved policy version
  */
 export async function executeApprovedPolicy(
   simulationId: string
 ): Promise<ExecutionResult> {
-  const approval = await PolicyApproval.findOne({ simulationId }).exec();
 
+  const approval = await PolicyApproval.findOne({ simulationId }).exec();
 
   if (!approval) {
     throw new Error("Approval not found");
@@ -31,35 +31,73 @@ export async function executeApprovedPolicy(
     };
   }
 
-  /**
-   * 🔹 RBAC execution example
-   * (In production this would update DB-driven policy storage)
-   */
+  const { policyId, version } = approval.metadata || {};
 
-  if (approval.metadata?.rbacChange) {
-    const change = approval.metadata.rbacChange;
-
-    RBAC_MATRIX[change.roleId as Role] = [
-      ...change.permissions,
-    ] as Permission[];
+  if (!policyId || !version) {
+    throw new Error("Invalid approval metadata");
   }
 
-  /**
-   * 🔹 ABAC execution example
-   * (Real implementation would update attribute store)
-   */
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (approval.metadata?.abacChange) {
-    // Here you'd persist attribute changes
-    // For now assume execution success
+  try {
+    const policy = await Policy.findOne({ policyId }).session(session);
+
+    if (!policy) {
+      throw new Error("Policy not found");
+    }
+
+    const policyVersion = await PolicyVersion.findOne({
+      policyId,
+      version
+    }).session(session);
+
+    if (!policyVersion) {
+      throw new Error("Policy version not found");
+    }
+
+    /**
+     * 1️⃣ Mark previous versions deprecated
+     */
+    await PolicyVersion.updateMany(
+      { policyId, version: { $ne: version } },
+      { status: "deprecated" },
+      { session }
+    );
+
+    /**
+     * 2️⃣ Activate selected version
+     */
+    policyVersion.status = "active";
+    policyVersion.activatedAt = new Date();
+
+    await policyVersion.save({ session });
+
+    /**
+     * 3️⃣ Update active pointer
+     */
+    policy.activeVersion = version;
+    await policy.save({ session });
+
+    /**
+     * 4️⃣ Mark approval executed
+     */
+    approval.executedAt = new Date();
+    await approval.save({ session });
+
+    await session.commitTransaction();
+    session.endSession();
+    invalidatePolicyCacheByPolicyId(policyId);
+    return {
+      executed: true,
+      executedAt: approval.executedAt,
+      message: "Policy successfully activated",
+    };
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-
-  approval.executedAt = new Date();
-  await approval.save();
-
-  return {
-    executed: true,
-    executedAt: approval.executedAt,
-    message: "Policy successfully executed",
-  };
 }
+

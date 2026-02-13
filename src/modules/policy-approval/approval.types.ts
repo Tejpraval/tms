@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-approval\approval.types.ts :
 export type ApprovalStatus =
   | "PENDING"
   | "APPROVED"
@@ -15,3 +16,15 @@ export interface ApprovalDecision {
   decidedAt: string;
   comment?: string;
 }
+
+
+export interface PolicyActivationMetadata {
+  policyId: string;
+  version: number;
+
+  // keep backward compatibility if needed
+  rbacChange?: any;
+  abacChange?: any;
+}
+
+export interface PolicyApprovalMetadata extends PolicyActivationMetadata {}

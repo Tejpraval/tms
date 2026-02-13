@@ -10,7 +10,7 @@ import policySimulationRoutes from "./modules/policy-simulation/simulation.route
 
 import approvalRoutes from "./modules/policy-approval/approval.routes";
 
-
+import policyVersionRoutes from "./modules/policy-versioning/policyVersion.routes";
 
 
 const app = express();
@@ -36,4 +36,6 @@ app.use('/api/tenant', tenantRoutes);
 app.use(errorHandler);
 app.use("/policies", policySimulationRoutes);
 app.use("/policy-approvals", approvalRoutes);
+
+app.use("/api/policies", policyVersionRoutes);
 export default app;

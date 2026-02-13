@@ -21,8 +21,9 @@ import { explainRisk } from "./explain/risk.explainer";
 import { AuditStep, ExplanationItem } from "./explain/explain.types";
 import { createApprovalFromSimulation } from "../policy-approval/approval.service";
 import { randomUUID } from "crypto";
-
-
+import { Policy } from "../policy-versioning/policy.model";
+import { getPolicyVersionFromCache } from "../../utils/policyCache";
+import { AbacDecision,  AbacAction } from "./simulation.types";
 /**
  * Unified policy simulation (RBAC + ABAC)
  */
@@ -146,5 +147,103 @@ if (result.risk) {
 
 
 }
+
+
+/**
+ * Simulate specific policy version
+ */
+
+
+export async function simulatePolicyVersion(
+  policyId: string,
+  tenantId: string,
+  version?: number
+) {
+  const policy = await Policy.findOne({ policyId });
+
+  if (!policy) {
+    throw new Error("Policy not found");
+  }
+
+  const versionToUse = version ?? policy.activeVersion;
+
+  const policyVersion = await getPolicyVersionFromCache(
+    policyId,
+    versionToUse
+  );
+
+  const users = (await User.find({ tenantId }).lean()).map(u => ({
+    _id: u._id.toString(),
+    role: u.role,
+    tenantId: u.tenantId?.toString(),
+  }));
+
+  const tenants = (await Tenant.find({ _id: tenantId }).lean()).map(t => ({
+    _id: t._id.toString(),
+    tenantId: t._id.toString(),
+    status: (t.isDeleted ? "ARCHIVED" : "ACTIVE") as "ACTIVE" | "ARCHIVED",
+  }));
+
+  /**
+   * BEFORE (baseline active version)
+   */
+  const baseline = runAbacSimulation({
+    users,
+    tenants,
+    change: undefined as any
+  });
+
+  const before = baseline.before;
+
+  /**
+   * AFTER (evaluate selected version rules)
+   */
+  const after = evaluateAbacRulesDirectly(
+    users,
+    tenants,
+    policyVersion.rules
+  );
+
+  return {
+    policyId,
+    version: versionToUse,
+    result: diffAbacDecisions(before, after)
+  };
+}
+
+
+
+function evaluateAbacRulesDirectly(
+  users: any[],
+  tenants: any[],
+  rules: any[]
+): AbacDecision[] {
+
+  const decisions: AbacDecision[] = [];
+
+  for (const user of users) {
+    for (const resource of tenants) {
+
+      let allowed = false;
+
+      for (const rule of rules) {
+        if (rule.effect !== "allow") continue;
+        if (rule.actions?.includes("read")) {
+          allowed = true;
+        }
+      }
+
+      decisions.push({
+        userId: user._id,
+        resourceId: resource._id,
+        action: "READ" as AbacAction,
+        allowed
+      });
+    }
+  }
+
+  return decisions;
+}
+
 
 

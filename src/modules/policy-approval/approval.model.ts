@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { ApprovalStatus, ApprovalActorRole } from "./approval.types";
 import { SimulationChange } from "../policy-simulation/simulation.types";
-
+import { PolicyApprovalMetadata } from "./approval.types";
 export interface PolicyApprovalDocument extends Document {
   tenantId: string;
   simulationId: string;
@@ -17,11 +17,7 @@ export interface PolicyApprovalDocument extends Document {
   executedAt?: Date;
 
   // ✅ NEW (this is critical for Phase 6.2)
-  metadata?: {
-    rbacChange?: SimulationChange;
-    abacChange?: any;
-  };
-
+metadata?: PolicyApprovalMetadata;
   createdAt: Date;
 }
 
