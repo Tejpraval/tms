@@ -24,6 +24,8 @@ import { randomUUID } from "crypto";
 import { Policy } from "../policy-versioning/policy.model";
 import { getPolicyVersionFromCache } from "../../utils/policyCache";
 import { AbacDecision,  AbacAction } from "./simulation.types";
+import { PolicyVersion } from "../policy-versioning/policyVersion.model";
+
 /**
  * Unified policy simulation (RBAC + ABAC)
  */
@@ -157,7 +159,7 @@ if (result.risk) {
 export async function simulatePolicyVersion(
   policyId: string,
   tenantId: string,
-  version?: number
+  versionNumber?: number
 ) {
   const policy = await Policy.findOne({ policyId });
 
@@ -165,12 +167,25 @@ export async function simulatePolicyVersion(
     throw new Error("Policy not found");
   }
 
-  const versionToUse = version ?? policy.activeVersion;
+  let policyVersion;
 
-  const policyVersion = await getPolicyVersionFromCache(
+  // If specific version number provided → load by version number
+  if (versionNumber !== undefined) {
+    policyVersion = await getPolicyVersionFromCache(
+      policyId,
+      versionNumber
+    );
+ } else {
+  policyVersion = await getPolicyVersionFromCache(
     policyId,
-    versionToUse
+    policy.activeVersion   // ✅ use NUMBER directly
   );
+}
+
+
+  if (!policyVersion) {
+    throw new Error("Policy version not found");
+  }
 
   const users = (await User.find({ tenantId }).lean()).map(u => ({
     _id: u._id.toString(),
@@ -184,9 +199,6 @@ export async function simulatePolicyVersion(
     status: (t.isDeleted ? "ARCHIVED" : "ACTIVE") as "ACTIVE" | "ARCHIVED",
   }));
 
-  /**
-   * BEFORE (baseline active version)
-   */
   const baseline = runAbacSimulation({
     users,
     tenants,
@@ -195,9 +207,6 @@ export async function simulatePolicyVersion(
 
   const before = baseline.before;
 
-  /**
-   * AFTER (evaluate selected version rules)
-   */
   const after = evaluateAbacRulesDirectly(
     users,
     tenants,
@@ -206,7 +215,7 @@ export async function simulatePolicyVersion(
 
   return {
     policyId,
-    version: versionToUse,
+    version: versionNumber ?? "active",
     result: diffAbacDecisions(before, after)
   };
 }

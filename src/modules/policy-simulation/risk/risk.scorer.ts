@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-simulation\risk\risk.scorer.ts
 import { PERMISSION_RISK } from "./permission.weights";
 import { RiskResult } from "./risk.types";
 

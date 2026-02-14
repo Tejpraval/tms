@@ -2,15 +2,19 @@ import { Policy } from "./policy.model";
 import { PolicyVersion } from "./policyVersion.model";
 import { generateChecksum } from "../../utils/checksum";
 import mongoose from "mongoose";
+
+/**
+ * Create Draft Version
+ */
 export const createDraftVersion = async (
   policyId: string,
   rules: any,
   userId: string
 ) => {
-
   const policy = await Policy.findOne({ policyId });
   if (!policy) throw new Error("Policy not found");
 
+  // ✅ use latestVersion (number)
   const newVersionNumber = policy.latestVersion + 1;
 
   const version = await PolicyVersion.create({
@@ -22,12 +26,16 @@ export const createDraftVersion = async (
     status: "draft"
   });
 
+  // ✅ update latestVersion
   policy.latestVersion = newVersionNumber;
   await policy.save();
 
   return version;
 };
 
+/**
+ * Activate Specific Version
+ */
 export const activateVersion = async (
   policyId: string,
   versionNumber: number,
@@ -59,7 +67,9 @@ export const activateVersion = async (
       { session }
     );
 
+    // ✅ update NUMBER pointer (not ObjectId)
     policy.activeVersion = versionNumber;
+
     await policy.save({ session });
 
     await session.commitTransaction();
@@ -74,13 +84,14 @@ export const activateVersion = async (
   }
 };
 
-
+/**
+ * Rollback Policy (creates new draft from old version)
+ */
 export const rollbackPolicy = async (
   policyId: string,
   targetVersion: number,
   userId: string
 ) => {
-
   const oldVersion = await PolicyVersion.findOne({
     policyId,
     version: targetVersion

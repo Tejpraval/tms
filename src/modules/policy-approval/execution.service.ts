@@ -73,11 +73,13 @@ export async function executeApprovedPolicy(
 
     await policyVersion.save({ session });
 
-    /**
-     * 3️⃣ Update active pointer
-     */
-    policy.activeVersion = version;
-    await policy.save({ session });
+/**
+ * 3️⃣ Update active version number
+ */
+policy.activeVersion = policyVersion.version;
+
+await policy.save({ session });
+
 
     /**
      * 4️⃣ Mark approval executed
