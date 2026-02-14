@@ -133,13 +133,16 @@ result.simulationId = simulationId;
 // Create approval record (Phase 6.1)
 if (result.risk) {
   await createApprovalFromSimulation({
-    tenantId: input.tenantId,
-    simulationId,
-    risk: {
-      score: result.risk.score,
-      severity: result.risk.severity,
-    },
-  });
+  tenantId: input.tenantId,
+  simulationId,
+  policyId: input.policyId,
+  version: input.version,
+  risk: {
+    score: result.risk.score,
+    severity: result.risk.severity,
+  },
+});
+
 }
 
 

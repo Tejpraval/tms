@@ -15,7 +15,14 @@ export const createDraftVersion = async (
   if (!policy) throw new Error("Policy not found");
 
   // ✅ use latestVersion (number)
-  const newVersionNumber = policy.latestVersion + 1;
+  const highestVersion = await PolicyVersion.findOne({ policyId })
+  .sort({ version: -1 })
+  .lean();
+
+const newVersionNumber = highestVersion
+  ? highestVersion.version + 1
+  : 1;
+
 
   const version = await PolicyVersion.create({
     policyId,

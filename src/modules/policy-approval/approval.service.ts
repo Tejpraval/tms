@@ -4,12 +4,13 @@ import { ApprovalActorRole } from "./approval.types";
 export async function createApprovalFromSimulation(input: {
   tenantId: string;
   simulationId: string;
+  policyId: string;
+  version: number;
   risk: {
     score: number;
     severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   };
 }) {
-  // 🔹 Hybrid auto-approval rule
   const isAutoApproved = input.risk.severity === "LOW";
 
   const approval = await PolicyApproval.create({
@@ -22,10 +23,17 @@ export async function createApprovalFromSimulation(input: {
     status: isAutoApproved ? "APPROVED" : "PENDING",
     decidedBy: isAutoApproved ? "SYSTEM" : undefined,
     decidedAt: isAutoApproved ? new Date() : undefined,
+
+    // 🔥 THIS FIXES EVERYTHING
+    metadata: {
+      policyId: input.policyId,
+      version: input.version,
+    },
   });
 
   return approval;
 }
+
 
 
 const APPROVAL_AUTHORITY: Record<

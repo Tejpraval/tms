@@ -15,20 +15,26 @@ async function evaluateReleaseRisk(release: any): Promise<number> {
     release.candidateVersionId
   );
 
-  if (!base || !candidate) {
-    throw new Error("Version not found during rollout evaluation");
-  }
+if (!base || !candidate) {
+  console.error("Invalid release version reference:", release._id);
+  return 0; // fail-safe instead of crash
+}
 
   const diff = computeDiff(base.rules || [], candidate.rules || []);
+  const changes = [
+  ...(diff.added || []),
+  ...(diff.modified || [])
+];
 
-  const risk = scorePolicyRisk({
-    rbacDiffs: undefined,
-    abacChanges: diff.modified?.map(() => ({
-      action: "unknown",
-      from: "DENY",
-      to: "ALLOW"
-    }))
-  });
+const risk = scorePolicyRisk({
+  rbacDiffs: undefined,
+  abacChanges: changes.map(() => ({
+    action: "unknown",
+    from: "DENY",
+    to: "ALLOW"
+  }))
+});
+
 
   return risk.score;
 }
@@ -53,7 +59,8 @@ export async function processActiveRollouts(): Promise<void> {
 
       const riskScore = await evaluateReleaseRisk(release);
 
-      // 🔴 CRITICAL → rollback
+      // 🔴 CRITICAL → rollback //
+      // if (riskScore >= 80) {
       if (riskScore >= 80) {
         console.log(
           `Rollback triggered for release ${release._id} (risk: ${riskScore})`

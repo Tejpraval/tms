@@ -68,10 +68,15 @@ export async function rollbackRelease(
 
   await release.save();
 
-  await Policy.findByIdAndUpdate(release.policyId, {
-    releaseMode: "STATIC",
-    releaseId: null,
-  });
+  // 🔥 FIX: use business policyId correctly
+  await Policy.findOneAndUpdate(
+    { policyId: release.policyId },
+    {
+      releaseMode: "STATIC",
+      releaseId: null,
+    }
+  );
 
   return release;
 }
+

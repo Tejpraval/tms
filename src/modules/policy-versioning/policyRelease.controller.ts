@@ -25,10 +25,16 @@ export async function createRelease(req: Request, res: Response) {
     expansionHistory: [],
   });
 
-  await Policy.findByIdAndUpdate(policyId, {
+await Policy.findOneAndUpdate(
+  { policyId },   // ✅ use business id
+  {
     releaseMode: "ROLLOUT",
     releaseId: release._id,
-  });
+  }
+);
+
+
+
 
   res.status(201).json(release);
 }

@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-simulation\simulation.controller.ts
 import { Request, Response } from "express";
 import { simulateUnifiedPolicyChange } from "./simulation.service";
 
@@ -23,29 +24,33 @@ export async function simulatePolicyController(
       }
 
 
-           const { rbacChange, abacChange } = req.body;
+           const { policyId, version, rbacChange, abacChange } = req.body;
 
-            if (!rbacChange && !abacChange) {
-                   return res.status(400).json({
-                 message: "Simulation change payload missing",
-                 });
-              }
-
-
+       if (!policyId || version === undefined) {
+  return res.status(400).json({
+    message: "policyId and version are required for simulation",
+  });
+}
 
 
-       const result = await simulateUnifiedPolicyChange({
-           tenantId,
-           rbacChange,
-           abacChange,
-      });
+
+
+const result = await simulateUnifiedPolicyChange({
+  tenantId,
+  policyId,
+  version,
+  rbacChange,
+  abacChange,
+});
 
 
     return res.status(200).json(result);
-  } catch (error) {
-    console.error("Policy simulation failed:", error);
-    return res.status(500).json({
-      message: "Policy simulation failed",
-    });
-  }
+  }catch (error: any) {
+  console.error("🔥 SIMULATION ERROR:", error);
+  return res.status(500).json({
+    message: "Policy simulation failed",
+    error: error?.message
+  });
+}
+
 }

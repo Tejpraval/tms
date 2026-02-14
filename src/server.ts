@@ -7,13 +7,14 @@ import policyApprovalRoutes from "./modules/policy-approval/approval.routes";
 import executionRoutes from "./modules/policy-approval/execution.routes";
 import cron from "node-cron";
 import { processActiveRollouts } from "./modules/policy-versioning/rolloutOrchestrator.service";
+import policyVersionRoutes from "./modules/policy-versioning/policyVersion.routes";
 // 🔹 Policy Simulation (RBAC + ABAC)
 app.use("/api/policies", policySimulationRoutes);
 
 // 🔹 Policy Approval Workflow
 app.use("/api/policy-approval", policyApprovalRoutes);
 app.use("/api/policy-execution", executionRoutes);
-
+app.use("/api/policies", policyVersionRoutes);
 (async () => {
   await connectDB();
   cron.schedule("*/1 * * * *", async () => {

@@ -102,6 +102,11 @@ export interface UnifiedSimulationResult {
 
 export interface UnifiedSimulationInput {
   tenantId: string;
-  rbacChange?: SimulationChange;
-  abacChange?: UserAttributeUpdateChange;
+
+  policyId: string;     // 🔥 add this
+  version: number;      // 🔥 add this
+
+  rbacChange?: any;
+  abacChange?: any;
 }
+
