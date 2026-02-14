@@ -12,6 +12,10 @@ export const RBAC_MATRIX: Record<Role, Permission[]> = {
     Permission.PROPERTY_MANAGE,
     Permission.PAYMENT_READ,
     Permission.USER_MANAGE,
+    Permission.POLICY_WRITE,
+    Permission.POLICY_APPROVE,
+    Permission.POLICY_ADMIN,
+    Permission.POLICY_READ,
   ],
 
   MANAGER: [
