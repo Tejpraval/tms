@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\config\db.ts
 import mongoose from 'mongoose';
 import { ENV } from './env';
 
