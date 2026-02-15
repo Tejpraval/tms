@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\tenant\tenant.routes.ts
 import { Router } from "express";
 import  authMiddleware  from "../../middleware/auth.middleware";
 import { requirePermission } from "../../middleware/requirePermission";
