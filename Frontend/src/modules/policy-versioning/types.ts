@@ -1,3 +1,4 @@
+//D:\resumeproject\Frontend\src\modules\policy-versioning\types.ts
 /* --------------------------------------------
    Policy Core Types
 --------------------------------------------- */
@@ -6,23 +7,45 @@ export interface Policy {
   _id: string;
   policyId: string;
   name?: string;
-  releaseMode?: "DIRECT" | "ROLLOUT";
+
+  activeVersion: number;
+  latestVersion: number;
+
+  releaseMode: "STATIC" | "ROLLOUT";
+
   releaseId?: string | null;
+
   createdAt?: string;
   updatedAt?: string;
 }
 
+
 /* --------------------------------------------
    Policy Version
 --------------------------------------------- */
+export type PolicyVersionStatus =
+  | "draft"
+  | "active"
+  | "deprecated"
+  | "rolled_back";
+
 
 export interface PolicyVersion {
   _id: string;
   policyId: string;
   version: number;
+  status: PolicyVersionStatus;
   rules: unknown;
+
+  parentVersion?: number;
+
   createdBy?: string;
-  createdAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  activatedAt?: string;
+
+  createdAt: string;
+  updatedAt?: string;
 }
 
 /* --------------------------------------------

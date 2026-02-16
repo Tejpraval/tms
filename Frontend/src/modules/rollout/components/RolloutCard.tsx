@@ -1,3 +1,4 @@
+//D:\resumeproject\Frontend\src\modules\rollout\components\RolloutCard.tsx
 import type { Release } from "../api";
 
 interface Props {

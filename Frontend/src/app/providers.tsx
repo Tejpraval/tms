@@ -1,15 +1,17 @@
+//D:\resumeproject\Frontend\src\app\providers.tsx
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
-import type { ReactNode } from "react";
 
-interface Props {
-  children: ReactNode;
-}
-
-export const AppProviders = ({ children }: Props) => {
+export const AppProviders = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    
   );
 };

@@ -31,6 +31,10 @@ export const API = {
     ACTIVE: "/api/policy-release/active",
     EXPAND: (id: string) => `/api/policy-release/${id}/expand`,
     ROLLBACK: (id: string) => `/api/policy-release/${id}/rollback`,
+    POLICY: (policyId: string) =>
+  `/api/policy-release/policy/${policyId}`,
+    STATUS: (id: string) => `/api/policy-release/${id}/status`,
+
   },
 
   EVALUATION: {

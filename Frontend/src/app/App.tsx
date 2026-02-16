@@ -1,11 +1,9 @@
-import '../index.css'
+//D:\resumeproject\Frontend\src\app\App.tsx
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 
-function App() {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white text-3xl font-bold">
-      Governance Cockpit Ready 🚀 new change test
-    </div>
-  )
-}
+const App = () => {
+  return <RouterProvider router={router} />;
+};
 
-export default App
+export default App;

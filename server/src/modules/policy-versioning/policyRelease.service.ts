@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-versioning\policyRelease.service.ts
 import { PolicyRelease } from "./policyRelease.model";
 import { PolicyVersion } from "./policyVersion.model";
 import { scorePolicyRisk } from "../policy-simulation/risk/risk.scorer";
@@ -80,3 +81,11 @@ export async function rollbackRelease(
   return release;
 }
 
+export async function getReleaseByPolicyId(
+  policyId: string
+) {
+  return PolicyRelease.findOne({
+    policyId,
+    status: { $in: ["ACTIVE", "PAUSED", "DRAFT"] }
+  });
+}

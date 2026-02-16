@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-versioning\policyRelease.controller.ts
 import { RequestHandler } from "express";
 import { PolicyRelease } from "./policyRelease.model";
 import {
@@ -5,7 +6,7 @@ import {
   rollbackRelease,
 } from "./policyRelease.service";
 import { Policy } from "./policy.model";
-
+import { getReleaseByPolicyId } from "./policyRelease.service";
 /* ------------------------------------------
    Create Release
 ------------------------------------------- */
@@ -112,6 +113,50 @@ export const listActiveReleases: RequestHandler =
       res.json({
         success: true,
         data: releases,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+export const  getReleaseByPolicy: RequestHandler = async (
+  req,
+  res
+) => {
+  try {
+    const { policyId } = req.params;
+
+    const release =
+      await getReleaseByPolicyId(policyId as string);
+
+    res.json({
+      success: true,
+      data: release
+    });
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+}  
+
+export const updateReleaseStatus: RequestHandler =
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const release =
+        await PolicyRelease.findByIdAndUpdate(
+          id,
+          { status },
+          { new: true }
+        );
+
+      res.json({
+        success: true,
+        data: release,
       });
     } catch (err) {
       next(err);

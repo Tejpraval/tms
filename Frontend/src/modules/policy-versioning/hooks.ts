@@ -1,3 +1,4 @@
+//D:\resumeproject\Frontend\src\modules\policy-versioning\hooks.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   listPolicies,
@@ -7,7 +8,8 @@ import {
   activateVersion,
   rollbackVersion,
 } from "./api";
-import type { Policy, PolicyVersion } from "./types";
+//import type { Policy, PolicyVersion } from "./types";
+import { useParams } from "react-router-dom";
 
 /* --------------------------------------------
    Query Keys
@@ -24,7 +26,7 @@ const POLICY_KEYS = {
 --------------------------------------------- */
 
 export const usePolicies = () => {
-  return useQuery<Policy[]>({
+  return useQuery({
     queryKey: POLICY_KEYS.all,
     queryFn: listPolicies,
   });
@@ -35,7 +37,7 @@ export const usePolicies = () => {
 --------------------------------------------- */
 
 export const usePolicy = (id: string) => {
-  return useQuery<Policy>({
+  return useQuery({
     queryKey: POLICY_KEYS.detail(id),
     queryFn: () => getPolicyById(id),
     enabled: !!id,
@@ -47,7 +49,7 @@ export const usePolicy = (id: string) => {
 --------------------------------------------- */
 
 export const usePolicyVersions = (id: string) => {
-  return useQuery<PolicyVersion[]>({
+  return useQuery({
     queryKey: POLICY_KEYS.versions(id),
     queryFn: () => listVersions(id),
     enabled: !!id,
@@ -130,4 +132,30 @@ export const useRollbackVersion = () => {
       });
     },
   });
+};
+
+/* --------------------------------------------
+   Policy Details Aggregator
+--------------------------------------------- */
+
+export const usePolicyDetails = () => {
+  const { id } = useParams<{ id: string }>();
+
+  const policyQuery = useQuery({
+    queryKey: POLICY_KEYS.detail(id!),
+    queryFn: () => getPolicyById(id!),
+    enabled: !!id,
+  });
+
+  const versionsQuery = useQuery({
+    queryKey: POLICY_KEYS.versions(id!),
+    queryFn: () => listVersions(id!),
+    enabled: !!id,
+  });
+
+  return {
+    policy: policyQuery.data,
+    versions: versionsQuery.data ?? [],
+    isLoading: policyQuery.isLoading || versionsQuery.isLoading,
+  };
 };
