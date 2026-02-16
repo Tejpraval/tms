@@ -6,7 +6,7 @@ import {
 } from "./approval.controller";
 import authMiddleware from "../../middleware/auth.middleware";
 import { executePolicy } from "./execution.controller";
-
+import { listPendingApprovals } from "./approval.controller";
 const router = Router();
 
 // 🔑 Type adaptation layer (THIS is what was missing)
@@ -26,6 +26,12 @@ router.post(
   "/execute",
   authMiddleware,
   executePolicy as RequestHandler
+);
+
+router.get(
+  "/pending",
+  authMiddleware,
+  listPendingApprovals as RequestHandler
 );
 
 

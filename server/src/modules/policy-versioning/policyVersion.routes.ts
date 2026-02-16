@@ -11,6 +11,7 @@ import {
 import  authMiddleware  from "../../middleware/auth.middleware";
 import { requirePermission } from "../../middleware/requirePermission";
 import { Permission } from "../../constants/permissions";
+import { listPolicies, getPolicyById } from "./policyVersion.controller";
 
 const router = Router();
 
@@ -63,5 +64,9 @@ router.get(
   requirePermission(Permission.POLICY_READ),
   listVersions
 );
+
+router.get("/", listPolicies);
+router.get("/:id", getPolicyById);
+
 
 export default router;

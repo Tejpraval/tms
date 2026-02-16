@@ -5,11 +5,11 @@ import {
   expandRelease,
   rollbackReleaseHandler,
 } from "./policyRelease.controller";
-
+import { listActiveReleases } from "./policyRelease.controller";
 const router = Router();
 
 router.post("/", createRelease);
 router.post("/:id/expand", expandRelease);
 router.post("/:id/rollback", rollbackReleaseHandler);
-
+router.get("/active", listActiveReleases);
 export default router;

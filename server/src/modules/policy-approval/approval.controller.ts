@@ -1,10 +1,10 @@
 //D:\resumeproject\server\src\modules\policy-approval\approval.controller.ts
-import { Response } from "express";
+import { RequestHandler, Response } from "express";
 import { AuthenticatedRequest } from "../../types/authenticated-request";
 import { decideApproval } from "./approval.service";
 import { Role } from "../../constants/roles";
 import { ApprovalActorRole } from "./approval.types";
-
+import { PolicyApproval } from "./approval.model";
 
 function mapRoleToApprovalActor(role: Role): ApprovalActorRole {
   switch (role) {
@@ -58,3 +58,25 @@ export async function rejectSimulation(
     res.status(400).json({ message: err.message });
   }
 }
+
+
+export const listPendingApprovals: RequestHandler = async (
+  req,
+  res
+) => {
+  try {
+    const approvals = await PolicyApproval.find({
+      status: "PENDING",
+    }).lean();
+
+    res.json({
+      success: true,
+      data: approvals,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch pending approvals",
+    });
+  }
+};

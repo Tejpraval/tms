@@ -16,7 +16,7 @@ import policyReleaseRoutes from "./modules/policy-versioning/policyRelease.route
 import policyEvaluationRoutes from "./modules/policy-evaluation/policyEvaluation.routes";
 
 import { errorHandler } from "./middleware/error.middleware";
-
+import auditRoutes from "./modules/audit/audit.routes";
 const app = express();
 
 /* ---------------- Middleware ---------------- */
@@ -38,6 +38,8 @@ app.use(express.urlencoded({ extended: true }));
 
 // Auth
 app.use("/api/auth", authRoutes);
+// Audit
+app.use("/api/audit", auditRoutes);
 
 // Tenant
 app.use("/api/tenant", tenantRoutes);

@@ -1,3 +1,4 @@
+//D:\resumeproject\server\src\modules\policy-versioning\policyVersion.controller.ts
 import { Request, Response, NextFunction } from "express";
 import {
   createDraftVersion,
@@ -6,7 +7,7 @@ import {
 } from "./policyVersion.service";
 import { compareVersions } from "../policy-simulation/engine/diff.engine";
 import { PolicyVersion } from "./policyVersion.model";
-
+import { Policy } from "./policy.model";
 // -----------------------------
 // Create Draft
 // -----------------------------
@@ -144,4 +145,29 @@ export const listVersions = async (
   } catch (err) {
     next(err);
   }
+}; 
+
+export const listPolicies = async (req: Request, res: Response) => {
+  const policies = await Policy.find().lean();
+
+  res.json({
+    success: true,
+    data: policies,
+  });
+};
+
+export const getPolicyById = async (req: Request, res: Response) => {
+  const policy = await Policy.findById(req.params.id).lean();
+
+  if (!policy) {
+    return res.status(404).json({
+      success: false,
+      message: "Policy not found",
+    });
+  }
+
+  res.json({
+    success: true,
+    data: policy,
+  });
 };

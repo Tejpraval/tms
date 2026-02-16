@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { RequestHandler } from "express";
 import { PolicyRelease } from "./policyRelease.model";
 import {
   expandRollout,
@@ -6,54 +6,114 @@ import {
 } from "./policyRelease.service";
 import { Policy } from "./policy.model";
 
-export async function createRelease(req: Request, res: Response) {
-  const {
-    tenantId,
-    policyId,
-    baseVersionId,
-    candidateVersionId,
-    rolloutPercentage,
-  } = req.body;
+/* ------------------------------------------
+   Create Release
+------------------------------------------- */
 
-  const release = await PolicyRelease.create({
-    tenantId,
-    policyId,
-    baseVersionId,
-    candidateVersionId,
-    rolloutPercentage,
-    status: "ACTIVE",
-    expansionHistory: [],
-  });
+export const createRelease: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const {
+      tenantId,
+      policyId,
+      baseVersionId,
+      candidateVersionId,
+      rolloutPercentage,
+    } = req.body;
 
-await Policy.findOneAndUpdate(
-  { policyId },   // ✅ use business id
-  {
-    releaseMode: "ROLLOUT",
-    releaseId: release._id,
+    const release = await PolicyRelease.create({
+      tenantId,
+      policyId,
+      baseVersionId,
+      candidateVersionId,
+      rolloutPercentage,
+      status: "ACTIVE",
+      expansionHistory: [],
+    });
+
+    await Policy.findOneAndUpdate(
+      { policyId },
+      {
+        releaseMode: "ROLLOUT",
+        releaseId: release._id,
+      }
+    );
+
+    res.status(201).json({
+      success: true,
+      data: release,
+    });
+  } catch (err) {
+    next(err);
   }
-);
+};
 
+/* ------------------------------------------
+   Expand Release
+------------------------------------------- */
 
+export const expandRelease: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const { newPercentage } = req.body;
+    const releaseId = req.params.id;
 
+    const release = await expandRollout(
+      releaseId as string,
+      newPercentage
+    );
 
-  res.status(201).json(release);
-}
+    res.json({
+      success: true,
+      data: release,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
-export async function expandRelease(req: Request, res: Response) {
-  const { newPercentage } = req.body;
+/* ------------------------------------------
+   Rollback Release
+------------------------------------------- */
 
-  const releaseId = req.params.id as string;
+export const rollbackReleaseHandler: RequestHandler =
+  async (req, res, next) => {
+    try {
+      const releaseId = req.params.id as string;
 
-  const release = await expandRollout(releaseId, newPercentage);
+      const release = await rollbackRelease(releaseId);
 
+      res.json({
+        success: true,
+        data: release,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
 
-  res.json(release);
-}
+/* ------------------------------------------
+   List Active Releases
+------------------------------------------- */
 
-export async function rollbackReleaseHandler(req: Request, res: Response) {
-  const releaseId = req.params.id as string;
+export const listActiveReleases: RequestHandler =
+  async (req, res, next) => {
+    try {
+      const releases = await PolicyRelease.find({
+        status: "ACTIVE",
+      }).lean();
 
-const release = await rollbackRelease(releaseId);
-
-  res.json(release);
-}
+      res.json({
+        success: true,
+        data: releases,
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
