@@ -12,11 +12,10 @@ import type {
 /* --------------------------------------------
    List Policies
 --------------------------------------------- */
-
 export const listPolicies = async (): Promise<Policy[]> => {
-  const { data } = await apiClient.get<
-    ApiResponse<Policy[]>
-  >(API.POLICIES.LIST);
+  const { data } = await apiClient.get<ApiResponse<Policy[]>>(
+    API.POLICIES.LIST
+  );
 
   if (!data.success) {
     throw new Error(data.message);
@@ -24,6 +23,7 @@ export const listPolicies = async (): Promise<Policy[]> => {
 
   return data.data;
 };
+
 
 /* --------------------------------------------
    Get Policy By ID

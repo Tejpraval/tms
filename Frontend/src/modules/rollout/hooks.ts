@@ -5,6 +5,7 @@ import type { PolicyRelease } from "./types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { expandRelease } from "./api";
 import { updateReleaseStatus } from "./api";
+import { rollbackRelease } from "./api";
 export const usePolicyRelease = (
   policyId?: string
 ) => {
@@ -64,6 +65,29 @@ export const useUpdateReleaseStatus = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["policy-release"],
+      });
+    },
+  });
+};
+
+
+
+export const useRollbackRelease = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (releaseId: string) =>
+      rollbackRelease(releaseId),
+
+    onSuccess: () => {
+      // refresh both release + policy
+      queryClient.invalidateQueries({
+  queryKey: ["policy-release"],
+  exact: false,
+});
+
+      queryClient.invalidateQueries({
+        queryKey: ["policy"],
       });
     },
   });

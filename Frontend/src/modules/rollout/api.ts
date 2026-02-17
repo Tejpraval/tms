@@ -69,3 +69,18 @@ export const updateReleaseStatus = async (
 
   return data.data;
 };
+
+
+export const rollbackRelease = async (
+  releaseId: string
+) => {
+  const { data } = await apiClient.post(
+    API.RELEASE.ROLLBACK(releaseId)
+  );
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data.data;
+};

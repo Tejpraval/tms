@@ -1,8 +1,12 @@
+//D:\resumeproject\Frontend\src\pages\dashboard\DashboardPage.tsx
 import { useDashboardData } from "./useDashboardData";
 import { RiskBanner } from "@/modules/risk/components/RiskBanner";
 import { RolloutCard } from "@/modules/rollout/components/RolloutCard";
 import { ApprovalAgingCard } from "@/modules/policy-approval/components/ApprovalAgingCard";
 import { AuditTimeline } from "@/modules/audit/components/ActivityTimeline";
+import { useApprovalSlaIntelligence } from "@/modules/policy-approval/hooks/useApprovalSlaIntelligence";
+import { ApprovalSlaIntelligenceCard } from "@/modules/policy-approval/components/ApprovalSlaIntelligenceCard";
+
 
 const DashboardPage = () => {
   const {
@@ -12,7 +16,7 @@ const DashboardPage = () => {
     audits,
     isLoading,
   } = useDashboardData();
-
+    const slaMetrics = useApprovalSlaIntelligence(approvals);
   if (isLoading) {
     return (
       <div className="p-6 text-white">
@@ -20,6 +24,7 @@ const DashboardPage = () => {
       </div>
     );
   }
+
 
   return (
     <div className="p-6 text-white">
@@ -34,10 +39,11 @@ const DashboardPage = () => {
           
           {/* Risk Banner */}
           <RiskBanner
-            pendingApprovals={approvals.length}
-            activeRollouts={releases.length}
-            totalPolicies={policies.length}
-          />
+           approvals={approvals}
+            releases={releases}
+            slaMultiplier={slaMetrics.riskAmplificationFactor}
+          /> 
+          <ApprovalSlaIntelligenceCard metrics={slaMetrics} />
 
           {/* KPI Grid */}
           <div className="grid grid-cols-3 gap-4">

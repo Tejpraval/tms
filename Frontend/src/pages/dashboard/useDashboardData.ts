@@ -1,30 +1,38 @@
+// src/pages/dashboard/useDashboardData.ts
+
 import { useQuery } from "@tanstack/react-query";
+
 import { listPolicies } from "@/modules/policy-versioning/api";
 import { listPendingApprovals } from "@/modules/policy-approval/api";
 import { listActiveReleases } from "@/modules/rollout/api";
 import { listRecentAudit } from "@/modules/audit/api";
 
+import type { Policy } from "@/types/policy.types";
+import type { Approval } from "@/modules/policy-approval/types";
+import type { PolicyRelease } from "@/modules/rollout/types";
+import type { AuditLog } from "@/modules/audit/types";
+
 export const useDashboardData = () => {
   const policiesQuery = useQuery({
     queryKey: ["dashboard", "policies"],
-    queryFn: listPolicies,
+    queryFn: listPolicies as () => Promise<Policy[]>,
   });
 
   const approvalsQuery = useQuery({
     queryKey: ["dashboard", "approvals"],
-    queryFn: listPendingApprovals,
-    refetchInterval: 15000, // 15 sec polling
+    queryFn: listPendingApprovals as () => Promise<Approval[]>,
+    refetchInterval: 15000,
   });
 
   const releasesQuery = useQuery({
     queryKey: ["dashboard", "releases"],
-    queryFn: listActiveReleases,
-    refetchInterval: 10000, // 10 sec polling
+    queryFn: listActiveReleases as () => Promise<PolicyRelease[]>,
+    refetchInterval: 10000,
   });
 
   const auditQuery = useQuery({
     queryKey: ["dashboard", "audit"],
-    queryFn: listRecentAudit,
+    queryFn: listRecentAudit as () => Promise<AuditLog[]>,
     refetchInterval: 20000,
   });
 

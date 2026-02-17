@@ -1,3 +1,4 @@
+//D:\resumeproject\Frontend\src\modules\rollout\types.ts
 export type ReleaseStatus =
   | "DRAFT"
   | "ACTIVE"
@@ -32,3 +33,5 @@ export interface PolicyRelease {
   createdAt: string;
   updatedAt: string;
 }
+
+

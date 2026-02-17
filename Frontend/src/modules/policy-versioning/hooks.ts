@@ -8,8 +8,9 @@ import {
   activateVersion,
   rollbackVersion,
 } from "./api";
-//import type { Policy, PolicyVersion } from "./types";
+
 import { useParams } from "react-router-dom";
+
 
 /* --------------------------------------------
    Query Keys
@@ -31,6 +32,7 @@ export const usePolicies = () => {
     queryFn: listPolicies,
   });
 };
+
 
 /* --------------------------------------------
    Get Single Policy

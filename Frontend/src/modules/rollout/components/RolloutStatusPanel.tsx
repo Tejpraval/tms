@@ -1,6 +1,7 @@
 //D:\resumeproject\Frontend\src\modules\rollout\components\RolloutStatusPanel.tsx
 import type { PolicyRelease } from "../types";
 import { useExpandRelease, useUpdateReleaseStatus } from "../hooks";
+import { useRollbackRelease } from "../hooks";
 
 interface Props {
   release: PolicyRelease;
@@ -23,6 +24,12 @@ export const RolloutStatusPanel = ({
 }: Props) => {
     const expandMutation = useExpandRelease(); 
     const statusMutation = useUpdateReleaseStatus();
+    const rollbackMutation = useRollbackRelease();
+    const isBusy =
+  expandMutation.isPending ||
+  statusMutation.isPending ||
+  rollbackMutation.isPending;
+
 
   return (
     <div className="bg-zinc-900 rounded-xl p-5 border border-zinc-800 space-y-6">
@@ -104,56 +111,117 @@ export const RolloutStatusPanel = ({
 {release.status === "ACTIVE" &&
   release.currentStageIndex <
     release.stages.length - 1 && (
+      <div className="space-y-3">
     <button
-      onClick={() => {
-        const nextStage =
-          release.stages[
-            release.currentStageIndex + 1
-          ];
+  disabled={isBusy}
+  onClick={() => {
+    const nextStage =
+      release.stages[
+        release.currentStageIndex + 1
+      ];
 
-        expandMutation.mutate({
-          releaseId: release._id,
-          newPercentage: nextStage,
-        });
-      }}
-      className="w-full bg-blue-600 hover:bg-blue-700 transition px-4 py-2 rounded text-sm font-semibold"
-    >
-      Promote to{" "}
-      {
+    expandMutation.mutate({
+      releaseId: release._id,
+      newPercentage: nextStage,
+    });
+  }}
+  className={`w-full px-4 py-2 rounded text-sm font-semibold transition
+    ${
+      isBusy
+        ? "bg-blue-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }
+  `}
+>
+  {expandMutation.isPending
+    ? "Promoting..."
+    : `Promote to ${
         release.stages[
           release.currentStageIndex + 1
         ]
-      }
-      %
-    </button>
+      }%`}
+     
+</button>
+ </div>
+
   )}
   {/* Pause / Resume Control */}
 {release.status === "ACTIVE" && (
-  <button
-    onClick={() =>
-      statusMutation.mutate({
-        releaseId: release._id,
-        status: "PAUSED",
-      })
+  <div className="space-y-3">
+<button
+  disabled={isBusy}
+  onClick={() =>
+    statusMutation.mutate({
+      releaseId: release._id,
+      status: "PAUSED",
+    })
+  }
+  className={`w-full px-4 py-2 rounded text-sm font-semibold transition
+    ${
+      isBusy
+        ? "bg-orange-400 cursor-not-allowed"
+        : "bg-orange-600 hover:bg-orange-700"
     }
-    className="w-full bg-orange-600 hover:bg-orange-700 transition px-4 py-2 rounded text-sm font-semibold"
-  >
-    Pause Rollout
-  </button>
+  `}
+>
+  {statusMutation.isPending
+    ? "Updating..."
+    : "Pause Rollout"}
+</button>
+</div>
 )}
 
 {release.status === "PAUSED" && (
-  <button
-    onClick={() =>
-      statusMutation.mutate({
-        releaseId: release._id,
-        status: "ACTIVE",
-      })
+  <div className="space-y-3">
+<button
+  disabled={isBusy}
+  onClick={() =>
+    statusMutation.mutate({
+      releaseId: release._id,
+      status: "ACTIVE",
+    })
+  }
+  className={`w-full px-4 py-2 rounded text-sm font-semibold transition
+    ${
+      isBusy
+        ? "bg-green-400 cursor-not-allowed"
+        : "bg-green-600 hover:bg-green-700"
     }
-    className="w-full bg-green-600 hover:bg-green-700 transition px-4 py-2 rounded text-sm font-semibold"
-  >
-    Resume Rollout
-  </button>
+  `}
+>
+  {statusMutation.isPending
+    ? "Resuming..."
+    : "Resume Rollout"}
+</button>
+</div>
+)}
+{/* Hard Rollback */}
+{release.status === "ACTIVE" && (
+  <div className="space-y-3">
+<button
+  disabled={isBusy}
+  onClick={() => {
+    const confirmAbort = window.confirm(
+      "Are you sure you want to abort this rollout? This will revert to the stable version."
+    );
+
+    if (!confirmAbort) return;
+
+    rollbackMutation.mutate(release._id);
+  }}
+  className={`w-full px-4 py-2 rounded text-sm font-semibold transition
+    ${
+      isBusy
+        ? "bg-red-400 cursor-not-allowed"
+        : "bg-red-600 hover:bg-red-700"
+    }
+  `}
+>
+  {rollbackMutation.isPending
+    ? "Aborting..."
+    : "Abort Rollout"}
+</button>
+</div>
 )}
 
 

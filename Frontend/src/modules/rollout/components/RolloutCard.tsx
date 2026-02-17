@@ -1,13 +1,15 @@
-//D:\resumeproject\Frontend\src\modules\rollout\components\RolloutCard.tsx
-import type { Release } from "../api";
+import type { PolicyRelease } from "../types";
 
 interface Props {
-  release: Release;
+  release: PolicyRelease;
 }
 
-const statusColor = {
+const statusColor: Record<string, string> = {
   ACTIVE: "text-blue-400",
   ROLLED_BACK: "text-red-400",
+  PAUSED: "text-yellow-400",
+  COMPLETED: "text-emerald-400",
+  DRAFT: "text-zinc-400",
 };
 
 export const RolloutCard = ({ release }: Props) => {
@@ -15,22 +17,21 @@ export const RolloutCard = ({ release }: Props) => {
     <div className="bg-zinc-900 rounded-2xl p-5 space-y-4 border border-zinc-800">
       <div className="flex justify-between items-center">
         <div>
-          <p className="text-sm text-zinc-400">
-            Policy
-          </p>
+          <p className="text-sm text-zinc-400">Policy</p>
           <h3 className="text-lg font-semibold">
             {release.policyId}
           </h3>
         </div>
 
         <span
-          className={`text-sm font-semibold ${statusColor[release.status]}`}
+          className={`text-sm font-semibold ${
+            statusColor[release.status] ?? "text-zinc-400"
+          }`}
         >
           {release.status}
         </span>
       </div>
 
-      {/* Progress Bar */}
       <div>
         <div className="flex justify-between text-sm text-zinc-400 mb-1">
           <span>Rollout Progress</span>
