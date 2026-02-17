@@ -6,6 +6,11 @@ import { ApprovalAgingCard } from "@/modules/policy-approval/components/Approval
 import { AuditTimeline } from "@/modules/audit/components/ActivityTimeline";
 import { useApprovalSlaIntelligence } from "@/modules/policy-approval/hooks/useApprovalSlaIntelligence";
 import { ApprovalSlaIntelligenceCard } from "@/modules/policy-approval/components/ApprovalSlaIntelligenceCard";
+import { useGovernanceRisk } from "@/modules/risk/hooks/useGovernanceRisk";
+import { useGovernanceStress } from "@/modules/risk/hooks/useGovernanceStress";
+import { GovernanceStressCard } from "@/modules/risk/components/GovernanceStressCard";
+import { useStressVolatility } from "@/modules/risk/hooks/useStressVolatility";
+import { useStressTrend } from "@/modules/risk/hooks/useStressTrend";
 
 
 const DashboardPage = () => {
@@ -17,6 +22,32 @@ const DashboardPage = () => {
     isLoading,
   } = useDashboardData();
     const slaMetrics = useApprovalSlaIntelligence(approvals);
+    const { score } = useGovernanceRisk({ approvals, releases });
+
+const adjustedScore = Math.round(
+  score * slaMetrics.riskAmplificationFactor
+);
+const { stressScore, stressTier } =
+  useGovernanceStress({
+    adjustedRiskScore: adjustedScore,
+    slaBreachPercentage: slaMetrics.breachPercentage,
+    activeRollouts: releases.length,
+  });
+  const { delta, trend } = useStressVolatility({
+  currentStress: stressScore,
+});
+  const {
+  history,
+  average,
+  momentum,
+  sustainedTrend,
+  stdDev,
+  predictedNext
+} = useStressTrend({
+  currentStress: stressScore,
+});
+
+
   if (isLoading) {
     return (
       <div className="p-6 text-white">
@@ -38,11 +69,26 @@ const DashboardPage = () => {
         <div className="col-span-3 space-y-6">
           
           {/* Risk Banner */}
-          <RiskBanner
-           approvals={approvals}
-            releases={releases}
-            slaMultiplier={slaMetrics.riskAmplificationFactor}
-          /> 
+<GovernanceStressCard
+  score={stressScore}
+  tier={stressTier}
+  delta={delta}
+  trend={trend}
+  average={average}
+  momentum={momentum}
+  sustainedTrend={sustainedTrend} 
+  history={history}
+  stdDev={stdDev}
+  predictedNext={predictedNext}
+/>
+
+
+<RiskBanner
+  approvals={approvals}
+  releases={releases}
+  slaMultiplier={slaMetrics.riskAmplificationFactor}
+/>
+
           <ApprovalSlaIntelligenceCard metrics={slaMetrics} />
 
           {/* KPI Grid */}
