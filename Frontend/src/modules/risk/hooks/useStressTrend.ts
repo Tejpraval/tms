@@ -67,6 +67,19 @@ export const useStressTrend = ({
 const predictedNext = Math.round(
   last + slope
 );
+ const drift = momentum / Math.max(history.length - 1, 1);
+
+const forecastSteps = 3;
+
+const forecast: number[] = [];
+
+let lastValue = history[history.length - 1] ?? currentStress;
+
+for (let i = 0; i < forecastSteps; i++) {
+  lastValue = Math.round(lastValue + drift);
+  forecast.push(Math.max(0, lastValue));
+}
+
 
   let sustainedTrend:
     | "STABLE"
@@ -85,5 +98,6 @@ const predictedNext = Math.round(
     sustainedTrend,
     stdDev,
     predictedNext,
+    forecast,
   };
 };

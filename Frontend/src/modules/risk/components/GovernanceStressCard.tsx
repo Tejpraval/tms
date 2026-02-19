@@ -10,6 +10,18 @@ interface Props {
   history: number[];
     stdDev: number;
     predictedNext: number;
+    rolloutInfluencePercent: number;
+    isAlerting?: boolean;
+    forecast?: number[];
+    basePercent: number;
+slaPercent: number;
+rolloutPercent: number;
+volatilityPercent: number; 
+narrative: string;
+recommendations: string[];
+
+
+
 }
 
 export const GovernanceStressCard = ({
@@ -22,7 +34,16 @@ export const GovernanceStressCard = ({
   sustainedTrend,
   history,
   stdDev,
-    predictedNext
+    predictedNext,
+    rolloutInfluencePercent,
+    isAlerting = false,
+    forecast = [], 
+    basePercent,
+    slaPercent,
+    rolloutPercent,
+    volatilityPercent, 
+    narrative,
+    recommendations,
 }: Props) => {
   const color =
     tier === "STABLE"
@@ -35,8 +56,11 @@ export const GovernanceStressCard = ({
   const width = 200;
   const height = 50;
 
-  const max = history.length > 0 ? Math.max(...history) : 1;
-const min = history.length > 0 ? Math.min(...history) : 0;
+ const combined = [...history, ...forecast];
+
+const max = combined.length > 0 ? Math.max(...combined) : 1;
+const min = combined.length > 0 ? Math.min(...combined) : 0;
+
 
 
   const points = history
@@ -53,6 +77,21 @@ const min = history.length > 0 ? Math.min(...history) : 0;
     })
     .join(" ");
   const volatilityIntensity = Math.min(stdDev / 40, 1); 
+   const forecastPoints = forecast
+  .map((value, index) => {
+    const x =
+      ((history.length + index) /
+        Math.max(history.length + forecast.length - 1, 1)) *
+      width;
+
+    const normalized =
+      (value - min) / Math.max(max - min, 1);
+
+    const y = height - normalized * height;
+
+    return `${x},${y}`;
+  })
+  .join(" ");
 
   return (
    <div
@@ -61,16 +100,28 @@ const min = history.length > 0 ? Math.min(...history) : 0;
     rounded-2xl p-6 relative overflow-hidden
     ${tier === "CRITICAL" ? "animate-pulse" : ""}
   `}
-  style={
-    tier === "CRITICAL"
-      ? {
-          boxShadow: `0 0 ${30 * volatilityIntensity}px rgba(255,0,0,${
-            0.4 * volatilityIntensity
-          })`,
-        }
-      : undefined
-  }
->
+ style={
+  isAlerting
+    ? {
+        boxShadow:
+          "0 0 60px rgba(255,0,0,0.6)",
+      }
+    : tier === "CRITICAL"
+    ? {
+        boxShadow: `0 0 ${30 * volatilityIntensity}px rgba(255,0,0,${
+          0.4 * volatilityIntensity
+        })`,
+      }
+    : undefined
+}
+
+>  
+ {isAlerting && (
+  <div className="absolute top-0 left-0 w-full bg-black/30 text-white text-xs font-bold tracking-wider px-4 py-1">
+    ⚠ Predictive Alert: Stress expected to breach critical threshold
+  </div>
+)}
+
 
       <p className="text-sm opacity-80">
         Governance Stress Index
@@ -179,24 +230,106 @@ const min = history.length > 0 ? Math.min(...history) : 0;
 
     strokeWidth="2"
     points={points}
+  /> 
+  {/* Forecast line */}
+{forecast.length > 0 && history.length > 0 && (
+  <polyline
+    fill="none"
+    stroke="yellow"
+    strokeWidth="2"
+    strokeDasharray="4 4"
+    points={`
+      ${points.split(" ").slice(-1)[0]}
+      ${forecastPoints}
+    `}
   />
+)}
 
-  {/* Last point highlight */}
-{history.length > 0 && (
+{forecast.length > 0 && (
   <circle
-    cx={width}
+    cx={
+      ((history.length + forecast.length - 1) /
+        Math.max(history.length + forecast.length - 1, 1)) *
+      width
+    }
     cy={
       height -
-      ((predictedNext - min) /
+      ((forecast[forecast.length - 1] - min) /
         Math.max(max - min, 1)) *
         height
     }
-    r="3"
+    r="4"
     fill="yellow"
   />
 )}
 
-</svg>
+
+
+
+
+</svg> 
+<div className="mt-5 space-y-2">
+  <p className="text-xs uppercase tracking-wider opacity-80">
+    Stress Composition
+  </p>
+
+  {[
+    { label: "Base Risk", value: basePercent },
+    { label: "SLA Pressure", value: slaPercent },
+    { label: "Rollout Pressure", value: rolloutPercent },
+    { label: "Volatility Boost", value: volatilityPercent },
+  ].map((item) => (
+    <div key={item.label}>
+      <div className="flex justify-between text-xs">
+        <span>{item.label}</span>
+        <span>{item.value}%</span>
+      </div>
+      <div className="w-full h-2 bg-white/20 rounded-full mt-1">
+        <div
+          className="h-2 bg-white rounded-full"
+          style={{ width: `${item.value}%` }}
+        />
+      </div>
+    </div>
+  ))}
+</div> 
+<div className="mt-6 p-3 bg-black/20 rounded-lg text-sm opacity-90">
+  {narrative}
+</div> 
+{recommendations.length > 0 && (
+  <div className="mt-6 space-y-2">
+    <p className="text-sm font-semibold">
+      Recommended Actions
+    </p>
+    {recommendations.map((rec, i) => (
+      <div
+        key={i}
+        className="text-sm bg-black/20 p-2 rounded"
+      >
+        • {rec}
+      </div>
+    ))}
+  </div>
+)}
+
+
+
+{rolloutInfluencePercent > 0 && (
+  <div className="mt-3">
+    <p className="text-sm">
+      Rollout Influence: {rolloutInfluencePercent}%
+    </p>
+
+    <div className="w-full h-2 bg-white/20 rounded-full mt-1">
+      <div
+        className="h-2 bg-white rounded-full"
+        style={{
+          width: `${rolloutInfluencePercent}%`,
+        }}
+      />
+    </div>
+  </div>
+)}
 
     </div>
   );
