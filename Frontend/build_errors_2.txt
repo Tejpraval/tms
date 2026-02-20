@@ -1,0 +1,8 @@
+src/pages/policies/PolicyDetailsPage.tsx(40,17): error TS2322: Type 'import("D:/resumeproject/Frontend/src/types/policy.types").Policy' is not assignable to type 'import("D:/resumeproject/Frontend/src/modules/policy-versioning/types").Policy'.
+  Types of property 'metadata' are incompatible.
+    Type '{ policyId: string; activeVersion: number; } | undefined' is not assignable to type '{ policyId: string; activeVersion: number; }'.
+      Type 'undefined' is not assignable to type '{ policyId: string; activeVersion: number; }'.
+src/pages/policies/PolicyDetailsPage.tsx(42,19): error TS2322: Type 'import("D:/resumeproject/Frontend/src/types/policy.types").Policy' is not assignable to type 'import("D:/resumeproject/Frontend/src/modules/policy-versioning/types").Policy'.
+  Types of property 'metadata' are incompatible.
+    Type '{ policyId: string; activeVersion: number; } | undefined' is not assignable to type '{ policyId: string; activeVersion: number; }'.
+      Type 'undefined' is not assignable to type '{ policyId: string; activeVersion: number; }'.

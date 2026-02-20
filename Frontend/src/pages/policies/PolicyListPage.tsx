@@ -61,11 +61,11 @@ const PolicyListPage = () => {
                 className="cursor-pointer border-t border-zinc-800 hover:bg-zinc-800/50 transition"
               >
                 <td className="px-4 py-3 font-medium">
-                  {policy.metadata?.policyId}
+                  {policy.policyId}
                 </td>
 
                 <td className="px-4 py-3">
-                  v{policy.metadata?.activeVersion ?? 0}
+                  v{policy.activeVersion}
                 </td>
 
                 <td className="px-4 py-3">
@@ -75,11 +75,10 @@ const PolicyListPage = () => {
                 <td className="px-4 py-3">
                   <span
                     className={`px-2 py-1 rounded text-xs font-semibold
-                      ${
-                        policy.releaseMode ===
+                      ${policy.releaseMode ===
                         "ROLLOUT"
-                          ? "bg-blue-500/20 text-blue-400"
-                          : "bg-green-500/20 text-green-400"
+                        ? "bg-blue-500/20 text-blue-400"
+                        : "bg-green-500/20 text-green-400"
                       }
                     `}
                   >

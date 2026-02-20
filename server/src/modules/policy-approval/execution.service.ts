@@ -31,24 +31,29 @@ export async function executeApprovedPolicy(
     };
   }
 
-  const { policyId, version } = approval.metadata || {};
+  // ✅ NEW ObjectId-based linkage
+  const policyObjectId = approval.policy;
+  const version = approval.version;
 
-  if (!policyId || !version) {
-    throw new Error("Invalid approval metadata");
+  if (!policyObjectId || !version) {
+    throw new Error("Invalid approval data");
   }
 
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    const policy = await Policy.findOne({ policyId }).session(session);
+
+    // 1️⃣ Fetch policy by ObjectId
+    const policy = await Policy.findById(policyObjectId).session(session);
 
     if (!policy) {
       throw new Error("Policy not found");
     }
 
+    // 2️⃣ Fetch specific version using ObjectId reference
     const policyVersion = await PolicyVersion.findOne({
-      policyId,
+      policy: policyObjectId,
       version
     }).session(session);
 
@@ -57,39 +62,39 @@ export async function executeApprovedPolicy(
     }
 
     /**
-     * 1️⃣ Mark previous versions deprecated
+     * 3️⃣ Deprecate other versions
      */
     await PolicyVersion.updateMany(
-      { policyId, version: { $ne: version } },
+      { policy: policyObjectId, version: { $ne: version } },
       { status: "deprecated" },
       { session }
     );
 
     /**
-     * 2️⃣ Activate selected version
+     * 4️⃣ Activate selected version
      */
     policyVersion.status = "active";
     policyVersion.activatedAt = new Date();
-
     await policyVersion.save({ session });
 
-/**
- * 3️⃣ Update active version number
- */
-policy.activeVersion = policyVersion.version;
-
-await policy.save({ session });
-
+    /**
+     * 5️⃣ Update policy root activeVersion pointer
+     */
+    policy.activeVersion = version;
+    await policy.save({ session });
 
     /**
-     * 4️⃣ Mark approval executed
+     * 6️⃣ Mark approval executed
      */
     approval.executedAt = new Date();
     await approval.save({ session });
 
     await session.commitTransaction();
     session.endSession();
-    invalidatePolicyCacheByPolicyId(policyId);
+
+    // Invalidate cache using ObjectId string
+    invalidatePolicyCacheByPolicyId(policyObjectId.toString());
+
     return {
       executed: true,
       executedAt: approval.executedAt,
@@ -102,4 +107,3 @@ await policy.save({ session });
     throw error;
   }
 }
-

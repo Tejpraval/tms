@@ -2,12 +2,12 @@
 import { Schema, model } from "mongoose";
 
 const policyVersionSchema = new Schema({
-  policyId: { type: String, required: true, index: true },
+  policy: { type: Schema.Types.ObjectId, ref: 'Policy', required: true, index: true },
   version: { type: Number, required: true },
 
   status: {
     type: String,
-    enum: ["draft", "active", "deprecated", "rolled_back"],
+    enum: ["draft", "pending_approval", "active", "deprecated", "rolled_back"],
     default: "draft"
   },
 
@@ -24,6 +24,6 @@ const policyVersionSchema = new Schema({
   activatedAt: { type: Date }
 }, { timestamps: true });
 
-policyVersionSchema.index({ policyId: 1, version: 1 }, { unique: true });
+policyVersionSchema.index({ policy: 1, version: 1 }, { unique: true });
 
 export const PolicyVersion = model("PolicyVersion", policyVersionSchema);

@@ -29,7 +29,7 @@ export async function login(email: string, password: string) {
   const accessToken = signAccessToken({
     userId: user.id,
     role: user.role,
-    tenantId: user.tenantId?.toString(),
+    ...(user.role !== 'SUPER_ADMIN' && { tenantId: user.tenantId?.toString() }),
   });
 
   const refreshToken = generateOpaqueToken();

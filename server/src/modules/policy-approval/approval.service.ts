@@ -11,29 +11,22 @@ export async function createApprovalFromSimulation(input: {
     severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   };
 }) {
-  const isAutoApproved = input.risk.severity === "LOW";
-
   const approval = await PolicyApproval.create({
     tenantId: input.tenantId,
     simulationId: input.simulationId,
 
+    policy: input.policyId,        // 🔥 store at root
+    version: input.version,        // 🔥 store at root
+
     riskScore: input.risk.score,
     riskSeverity: input.risk.severity,
 
-    status: isAutoApproved ? "APPROVED" : "PENDING",
-    decidedBy: isAutoApproved ? "SYSTEM" : undefined,
-    decidedAt: isAutoApproved ? new Date() : undefined,
-
-    // 🔥 THIS FIXES EVERYTHING
-    metadata: {
-      policyId: input.policyId,
-      version: input.version,
-    },
+    status: "PENDING",             // 🔥 ALWAYS pending
+    requestedBy: undefined,
   });
 
   return approval;
 }
-
 
 
 const APPROVAL_AUTHORITY: Record<
@@ -44,6 +37,12 @@ const APPROVAL_AUTHORITY: Record<
   HIGH: "ADMIN",
   CRITICAL: "SUPER_ADMIN",
 };
+
+import { recordApprovalDecision } from "../../observability";
+
+// ... (imports)
+
+// ... (createApprovalFromSimulation)
 
 export async function decideApproval(input: {
   simulationId: string;
@@ -77,6 +76,10 @@ export async function decideApproval(input: {
   approval.decidedAt = new Date();
 
   await approval.save();
+
+  // 📊 Metric
+  const decisionMetric = approval.status === "APPROVED" ? "approved" : "rejected";
+  recordApprovalDecision(approval.tenantId, decisionMetric);
 
   return approval;
 }

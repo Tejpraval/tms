@@ -3,12 +3,16 @@
 import { Router, RequestHandler } from "express";
 import { executePolicy } from "./execution.controller";
 import authMiddleware from "../../middleware/auth.middleware";
+import { requirePermission } from "../../middleware/requirePermission";
+import { Permission } from "../../constants/permissions";
 
 const router = Router();
 
+router.use(authMiddleware);
+
 router.post(
   "/execute",
-  authMiddleware,
+  requirePermission(Permission.POLICY_ADMIN),
   executePolicy as RequestHandler
 );
 

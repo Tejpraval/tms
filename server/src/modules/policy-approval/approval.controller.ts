@@ -12,6 +12,8 @@ function mapRoleToApprovalActor(role: Role): ApprovalActorRole {
       return "SUPER_ADMIN";
     case Role.ADMIN:
       return "ADMIN";
+    case Role.TENANT_ADMIN:
+      return "ADMIN"; // or create separate TENANT_ADMIN actor if needed
     case Role.MANAGER:
       return "MANAGER";
     default:
@@ -25,6 +27,14 @@ export async function approveSimulation(
 ) {
   try {
     const { simulationId, comment } = req.body;
+
+    const existingApproval = await PolicyApproval.findOne({ simulationId });
+    if (!existingApproval) {
+      return res.status(404).json({ message: "Approval not found" });
+    }
+    if (existingApproval.status !== "PENDING") {
+      return res.status(400).json({ message: `Illegal transition: Cannot approve from state ${existingApproval.status}` });
+    }
 
     const approval = await decideApproval({
       simulationId,
@@ -46,6 +56,14 @@ export async function rejectSimulation(
   try {
     const { simulationId, comment } = req.body;
 
+    const existingApproval = await PolicyApproval.findOne({ simulationId });
+    if (!existingApproval) {
+      return res.status(404).json({ message: "Approval not found" });
+    }
+    if (existingApproval.status !== "PENDING") {
+      return res.status(400).json({ message: `Illegal transition: Cannot reject from state ${existingApproval.status}` });
+    }
+
     const approval = await decideApproval({
       simulationId,
       actorRole: mapRoleToApprovalActor(req.user.role),
@@ -65,8 +83,10 @@ export const listPendingApprovals: RequestHandler = async (
   res
 ) => {
   try {
+    const userReq = req as AuthenticatedRequest;
     const approvals = await PolicyApproval.find({
       status: "PENDING",
+      tenantId: userReq.user?.tenantId,
     }).lean();
 
     res.json({

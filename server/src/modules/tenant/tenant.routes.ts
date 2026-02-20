@@ -1,6 +1,6 @@
 //D:\resumeproject\server\src\modules\tenant\tenant.routes.ts
 import { Router } from "express";
-import  authMiddleware  from "../../middleware/auth.middleware";
+import authMiddleware from "../../middleware/auth.middleware";
 import { requirePermission } from "../../middleware/requirePermission";
 import { enforceTenantScope } from "../../middleware/tenantScope";
 import { Permission } from "../../constants/permissions";
@@ -8,19 +8,36 @@ import {
   getTenantById,
   createTenant,
   deleteTenant,
+  getAllTenants,
 } from "./tenant.controller";
 import { authorize } from "../../middleware/authorize";
 import { canReadTenant } from "../../policies/tenant.policy";
 import { Tenant } from "./tenant.model";
+import { Request, Response, NextFunction } from "express";
 
 const router = Router();
 
+// router.get(
+//   "/:tenantId",
+//   authMiddleware,
+//   requirePermission(Permission.TENANT_READ),
+//   enforceTenantScope,
+//   getTenantById
+// );
+
+const requireSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (req.user?.role !== "SUPER_ADMIN") {
+    return res.status(403).json({ message: "Super Admin access required" });
+  }
+  next();
+};
+
 router.get(
-  "/:tenantId",
+  "/",
   authMiddleware,
+  requireSuperAdmin,
   requirePermission(Permission.TENANT_READ),
-  enforceTenantScope,
-  getTenantById
+  getAllTenants
 );
 
 router.post(

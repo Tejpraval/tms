@@ -1,22 +1,21 @@
-import type { ReactNode } from "react";
-import { TopCommandBar } from "./TopCommandBar";
+import { Outlet } from "react-router-dom";
+import { SidebarNavigation } from "./SidebarNavigation";
+import { HeaderBar } from "./HeaderBar";
 
-interface Props {
-  children: ReactNode;
-}
-
-export const AppLayout = ({ children }: Props) => {
+export const AppLayout = () => {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col">
-      
-      {/* Global Command Layer */}
-      <TopCommandBar />
+    <div className="flex h-screen overflow-hidden bg-zinc-950 text-white">
+      {/* Sidebar */}
+      <SidebarNavigation />
 
-      {/* Main Content */}
-      <div className="flex-1">
-        {children}
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <HeaderBar />
+
+        <main className="flex-1 overflow-auto bg-zinc-900/50 p-6">
+          <Outlet />
+        </main>
       </div>
-
     </div>
   );
 };

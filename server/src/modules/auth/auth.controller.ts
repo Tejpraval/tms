@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import * as AuthService from './auth.service';
 import { RefreshToken } from './refreshToken.model';
-import { signAccessToken  , generateOpaqueToken} from './token.util';
+import { signAccessToken, generateOpaqueToken } from './token.util';
 import { User } from '../user/user.model';
 import { ENV } from '../../config/env';
 import { generateCsrfToken } from './token.util';
-import bcrypt from "bcrypt"; 
-import { Role } from "../../constants/roles"; 
+import bcrypt from "bcrypt";
+import { Role } from "../../constants/roles";
 
 export async function register(req: Request, res: Response) {
   try {
@@ -107,22 +107,22 @@ export async function refresh(req: Request, res: Response) {
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   });
 
-const csrfToken = generateCsrfToken();
+  const csrfToken = generateCsrfToken();
 
-res.cookie(ENV.COOKIE_NAME, newRefreshToken, {
-  httpOnly: true,
-  secure: false,
-  sameSite: 'strict',
-  maxAge: 7 * 24 * 60 * 60 * 1000
-});
+  res.cookie(ENV.COOKIE_NAME, newRefreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000
+  });
 
-res.cookie('csrf_token', csrfToken, {
-  httpOnly: false,
-  secure: false,
-  sameSite: 'strict'
-});
+  res.cookie('csrf_token', csrfToken, {
+    httpOnly: false,
+    secure: false,
+    sameSite: 'strict'
+  });
 
-res.json({ accessToken: newAccessToken });
+  res.json({ accessToken: newAccessToken });
 
 
 }
@@ -138,12 +138,44 @@ export async function logout(req: Request, res: Response) {
   );
 
   res.clearCookie(ENV.COOKIE_NAME, {
-  httpOnly: true,
-  sameSite: 'strict',
-  secure: false
-});
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: false
+  });
 
   res.json({ success: true });
 }
 
+export async function getMe(req: Request, res: Response) {
+  try {
+    const userContext = req.user;
+    if (!userContext || !userContext.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
+    const { RBAC_MATRIX } = await import("../../constants/rbac");
+    const { Role: CustomRoleModel } = await import("../role/role.model");
+
+    let permissions: string[] = [];
+
+    if (userContext.role === 'SUPER_ADMIN') {
+      permissions = RBAC_MATRIX['SUPER_ADMIN'] || [];
+    } else {
+      const dbUser = await User.findById(userContext.id).select('customRoleId').lean();
+      if (dbUser && dbUser.customRoleId) {
+        const cRole = await CustomRoleModel.findOne({ _id: dbUser.customRoleId, tenantId: userContext.tenantId }).lean();
+        if (cRole) {
+          permissions = cRole.permissions || [];
+        } else {
+          return res.status(403).json({ message: "Forbidden: Custom role not found" });
+        }
+      } else {
+        permissions = RBAC_MATRIX[userContext.role as Role] || [];
+      }
+    }
+
+    res.json({ success: true, permissions });
+  } catch (err: any) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+}

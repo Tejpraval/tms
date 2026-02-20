@@ -11,21 +11,21 @@ export const createDraftVersion = async (
   rules: any,
   userId: string
 ) => {
-  const policy = await Policy.findOne({ policyId });
+  const policy = await Policy.findById(policyId);
   if (!policy) throw new Error("Policy not found");
 
   // ✅ use latestVersion (number)
-  const highestVersion = await PolicyVersion.findOne({ policyId })
-  .sort({ version: -1 })
-  .lean();
+  const highestVersion = await PolicyVersion.findOne({ policy: policyId })
+    .sort({ version: -1 })
+    .lean();
 
-const newVersionNumber = highestVersion
-  ? highestVersion.version + 1
-  : 1;
+  const newVersionNumber = highestVersion
+    ? highestVersion.version + 1
+    : 1;
 
 
   const version = await PolicyVersion.create({
-    policyId,
+    policy: policyId,
     version: newVersionNumber,
     rules,
     createdBy: userId,
@@ -52,11 +52,11 @@ export const activateVersion = async (
   session.startTransaction();
 
   try {
-    const policy = await Policy.findOne({ policyId }).session(session);
+    const policy = await Policy.findById(policyId).session(session);
     if (!policy) throw new Error("Policy not found");
 
     const version = await PolicyVersion.findOne({
-      policyId,
+      policy: policyId,
       version: versionNumber
     }).session(session);
 
@@ -69,7 +69,7 @@ export const activateVersion = async (
     await version.save({ session });
 
     await PolicyVersion.updateMany(
-      { policyId, version: { $ne: versionNumber } },
+      { policy: policyId, version: { $ne: versionNumber } },
       { status: "deprecated" },
       { session }
     );
@@ -100,7 +100,7 @@ export const rollbackPolicy = async (
   userId: string
 ) => {
   const oldVersion = await PolicyVersion.findOne({
-    policyId,
+    policy: policyId,
     version: targetVersion
   });
 

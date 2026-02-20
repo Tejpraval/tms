@@ -17,8 +17,12 @@ export interface PolicyApprovalDocument extends Document {
   executedAt?: Date;
 
   // ✅ NEW (this is critical for Phase 6.2)
-metadata?: PolicyApprovalMetadata;
+  metadata?: PolicyApprovalMetadata;
   createdAt: Date;
+
+  policy?: mongoose.Types.ObjectId;
+  version?: number;
+  requestedBy?: string;
 }
 
 const PolicyApprovalSchema = new Schema<PolicyApprovalDocument>(
@@ -53,6 +57,10 @@ const PolicyApprovalSchema = new Schema<PolicyApprovalDocument>(
     metadata: {
       type: Schema.Types.Mixed,
     },
+
+    policy: { type: Schema.Types.ObjectId, ref: 'Policy' },
+    version: { type: Number },
+    requestedBy: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

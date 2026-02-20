@@ -1,53 +1,53 @@
 export const API = {
   AUTH: {
-    LOGIN: "/api/auth/login",
-    REGISTER: "/api/auth/register",
-    REFRESH: "/api/auth/refresh",
-    LOGOUT: "/api/auth/logout",
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+    REFRESH: "/auth/refresh",
+    LOGOUT: "/auth/logout",
   },
 
   POLICIES: {
-    LIST: "/api/policies",
-    GET: (id: string) => `/api/policies/${id}`,
-    SIMULATE: "/api/policies/simulate",
-    DRAFT: (id: string) => `/api/policies/${id}/draft`,
+    LIST: "/policies",
+    GET: (id: string) => `/policies/${id}`,
+    SIMULATE: "/policies/simulate",
+    DRAFT: (id: string) => `/policies/${id}/draft`,
     ACTIVATE: (id: string, version: number) =>
-      `/api/policies/${id}/activate/${version}`,
+      `/policies/${id}/activate/${version}`,
     ROLLBACK: (id: string, version: number) =>
-      `/api/policies/${id}/rollback/${version}`,
-    COMPARE: (id: string) => `/api/policies/${id}/compare`,
-    VERSIONS: (id: string) => `/api/policies/${id}/versions`,
+      `/policies/${id}/rollback/${version}`,
+    COMPARE: (id: string) => `/policies/${id}/compare`,
+    VERSIONS: (id: string) => `/policies/${id}/versions`,
   },
 
   APPROVAL: {
-    APPROVE: "/api/policy-approval/approve",
-    REJECT: "/api/policy-approval/reject",
-    EXECUTE: "/api/policy-approval/execute",
-    PENDING: "/api/policy-approval/pending",
+    APPROVE: "/policy-approval/approve",
+    REJECT: "/policy-approval/reject",
+    EXECUTE: "/policy-approval/execute",
+    PENDING: "/policy-approval/pending",
   },
 
   RELEASE: {
-    CREATE: "/api/policy-release",
-    ACTIVE: "/api/policy-release/active",
-    EXPAND: (id: string) => `/api/policy-release/${id}/expand`,
-    ROLLBACK: (id: string) => `/api/policy-release/${id}/rollback`,
+    CREATE: "/policy-release",
+    ACTIVE: "/policy-release/active",
+    EXPAND: (id: string) => `/policy-release/${id}/expand`,
+    ROLLBACK: (id: string) => `/policy-release/${id}/rollback`,
     POLICY: (policyId: string) =>
-  `/api/policy-release/policy/${policyId}`,
-    STATUS: (id: string) => `/api/policy-release/${id}/status`,
+      `/policy-release/policy/${policyId}`,
+    STATUS: (id: string) => `/policy-release/${id}/status`,
 
   },
 
   EVALUATION: {
-    RUN: "/api/policy/evaluate",
+    RUN: "/policy/evaluate",
   },
 
   AUDIT: {
-    RECENT: "/api/audit/recent",
+    RECENT: "/audit/recent",
   },
 
   TENANT: {
-    GET: (id: string) => `/api/tenant/${id}`,
-    CREATE: "/api/tenant",
-    DELETE: (id: string) => `/api/tenant/${id}`,
+    GET: (id: string) => `/tenant/${id}`,
+    CREATE: "/tenant",
+    DELETE: (id: string) => `/tenant/${id}`,
   },
 };

@@ -8,6 +8,55 @@ import {
 import { compareVersions } from "../policy-simulation/engine/diff.engine";
 import { PolicyVersion } from "./policyVersion.model";
 import { Policy } from "./policy.model";
+import { generateChecksum } from "../../utils/checksum";
+// -----------------------------
+// Create Root Policy
+// -----------------------------
+export const createPolicy = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, policyId, rules, tags } = req.body;
+    const userReq = req as any; // Using explicit cast mapping underlying Authenticated headers
+
+    if (!name || !policyId || !rules) {
+      return res.status(400).json({ success: false, message: "Missing required fields: name, policyId, rules" });
+    }
+
+    const policy = new Policy({
+      name,
+      policyId,
+      tenantId: userReq.user?.tenantId,
+      activeVersion: undefined,
+      latestVersion: 1,
+      tags: tags || []
+    });
+    await policy.save();
+
+    const version = new PolicyVersion({
+      policy: policy._id,
+      version: 1,
+      status: "draft",
+      rules,
+      checksum: generateChecksum(rules),
+      createdBy: userReq.user?.id
+    });
+    await version.save();
+
+    res.status(201).json({
+      success: true,
+      data: {
+        policy,
+        version
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // -----------------------------
 // Create Draft
 // -----------------------------
@@ -53,10 +102,10 @@ export const activate = async (
 ) => {
   try {
     const idParam = req.params.id;
-if (!idParam || Array.isArray(idParam)) {
-  throw new Error("Invalid policy id");
-}
-const policyId = idParam;
+    if (!idParam || Array.isArray(idParam)) {
+      throw new Error("Invalid policy id");
+    }
+    const policyId = idParam;
     const { version } = req.params;
     const userId = (req as any).user?.id;
 
@@ -77,7 +126,7 @@ export const rollback = async (
   next: NextFunction
 ) => {
   try {
-    
+
     const idParam = req.params.id;
 
     if (!idParam || Array.isArray(idParam)) {
@@ -87,6 +136,17 @@ export const rollback = async (
     const policyId = idParam;
     const { version } = req.params;
     const userId = (req as any).user?.id;
+
+    const versionDoc = await PolicyVersion.findOne({ policy: policyId, version: Number(version) });
+    if (!versionDoc) {
+      return res.status(404).json({ message: "Policy version not found" });
+    }
+    if (versionDoc.status !== "active") {
+      return res.status(400).json({ message: `Illegal transition: Cannot rollback from state ${versionDoc.status.toUpperCase()}` });
+    }
+
+    versionDoc.status = "rolled_back";
+    await versionDoc.save();
 
     const result = await rollbackPolicy(policyId, Number(version), userId);
 
@@ -105,7 +165,7 @@ export const compare = async (
   next: NextFunction
 ) => {
   try {
-    
+
     const idParam = req.params.id;
 
     if (!idParam || Array.isArray(idParam)) {
@@ -138,17 +198,20 @@ export const listVersions = async (
   try {
     const { id } = req.params;
 
-    const versions = await PolicyVersion.find({ policyId: id })
+    const versions = await PolicyVersion.find({ policy: id })
       .sort({ version: -1 });
 
     res.json(versions);
   } catch (err) {
     next(err);
   }
-}; 
+};
+
+import { AuthenticatedRequest } from "../../types/authenticated-request";
 
 export const listPolicies = async (req: Request, res: Response) => {
-  const policies = await Policy.find().lean();
+  const userReq = req as AuthenticatedRequest;
+  const policies = await Policy.find({ tenantId: userReq.user?.tenantId }).lean();
 
   res.json({
     success: true,

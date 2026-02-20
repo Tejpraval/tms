@@ -1,0 +1,63 @@
+[
+  {
+    "_id": "697a0aecca93c5a30d489452",
+    "email": "user1@test.com",
+    "password": "$2b$12$ijANjhKhUt6dnSOjY/ZnTOwHcoGYYCkIn8Mu9JwPCFxhYqWIkC58C",
+    "role": "USER",
+    "__v": 0
+  },
+  {
+    "_id": "697a0b8d51031414a2065f49",
+    "email": "user2@test.com",
+    "password": "$2b$12$JzR6RIQQfx/QkskGqzDdCe1RDVzoad6B4U7FL3iPfWRJ8huaGSXx2",
+    "role": "ADMIN",
+    "__v": 0,
+    "tenantId": "698734c63a3d553bff3e516b"
+  },
+  {
+    "_id": "6988312b6a3c6ecd1d8b044d",
+    "email": "superadmin@test.com",
+    "password": "$2b$10$AG/iw0o6iS7ewuGcMKCWBOSVSiTHzUjrZ7j1zrylA4x93T5yatfl6",
+    "role": "SUPER_ADMIN",
+    "__v": 0
+  },
+  {
+    "_id": "6988333a6a3c6ecd1d8b0455",
+    "email": "admin@test.com",
+    "password": "$2b$10$cDEJc0TycrjCnZdtN3T7j.1hvoL.XgWH2X6EY21TYtmJaQCyM0w3e",
+    "role": "ADMIN",
+    "tenantId": "6988327c6a3c6ecd1d8b0452",
+    "__v": 0
+  },
+  {
+    "_id": "698833966a3c6ecd1d8b0458",
+    "email": "user@test.com",
+    "password": "$2b$10$NEMEDn4YpPyKjHpm.mM72e2eVd/Oaxa3INFB1w55diVPKOsjNT3Xq",
+    "role": "TENANT",
+    "tenantId": "6988327c6a3c6ecd1d8b0452",
+    "__v": 0
+  },
+  {
+    "_id": "6988371d6a3c6ecd1d8b045e",
+    "email": "admin2@test.com",
+    "password": "$2b$10$cxaBMeUZWmYgWtpQEyqnAeFXwaQMy7/vWff8Hh/Ul7Vi4GexVFUKC",
+    "role": "ADMIN",
+    "__v": 0
+  },
+  {
+    "_id": "698837d06a3c6ecd1d8b0463",
+    "email": "admin3@test.com",
+    "password": "$2b$10$i2fgBESOl9vTYnBrAJD79ONvH4bpxhTnpXby2X0rgjym7pIIVl4IC",
+    "role": "ADMIN",
+    "tenantId": "6988327c6a3c6ecd1d8b0452",
+    "__v": 0
+  },
+  {
+    "_id": "69887fc42a55efd2b6395d85",
+    "email": "tenant1@test.com",
+    "password": "$2b$10$VOPPOtrW2bQ/fNQ501pZGeUZ83BoDUG.zu2wuX2ah5QNI10Og.RaW",
+    "role": "TENANT",
+    "tenantId": "6988327c6a3c6ecd1d8b0452",
+    "__v": 0
+  }
+]

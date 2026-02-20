@@ -6,6 +6,7 @@ import { Policy } from "./policy.model";
 import { computeDiff } from "../policy-simulation/engine/diff.engine";
 import { scorePolicyRisk } from "../policy-simulation/risk/risk.scorer";
 import { rollbackRelease } from "./policyRelease.service";
+import { recordRolloutStage, recordRolloutFailure } from "../../observability";
 
 /**
  * Evaluate risk between base and candidate versions
@@ -16,25 +17,25 @@ async function evaluateReleaseRisk(release: any): Promise<number> {
     release.candidateVersionId
   );
 
-if (!base || !candidate) {
-  console.error("Invalid release version reference:", release._id);
-  return 0; // fail-safe instead of crash
-}
+  if (!base || !candidate) {
+    console.error("Invalid release version reference:", release._id);
+    return 0; // fail-safe instead of crash
+  }
 
   const diff = computeDiff(base.rules || [], candidate.rules || []);
   const changes = [
-  ...(diff.added || []),
-  ...(diff.modified || [])
-];
+    ...(diff.added || []),
+    ...(diff.modified || [])
+  ];
 
-const risk = scorePolicyRisk({
-  rbacDiffs: undefined,
-  abacChanges: changes.map(() => ({
-    action: "unknown",
-    from: "DENY",
-    to: "ALLOW"
-  }))
-});
+  const risk = scorePolicyRisk({
+    rbacDiffs: undefined,
+    abacChanges: changes.map(() => ({
+      action: "unknown",
+      from: "DENY",
+      to: "ALLOW"
+    }))
+  });
 
 
   return risk.score;
@@ -68,6 +69,9 @@ export async function processActiveRollouts(): Promise<void> {
         );
 
         await rollbackRelease(release._id.toString());
+
+        // 📊 Measure failure
+        recordRolloutFailure(release.tenantId, release.policyId);
         continue;
       }
 
@@ -97,6 +101,9 @@ export async function processActiveRollouts(): Promise<void> {
       console.log(
         `Promoted release ${release._id} → ${nextPercentage}%`
       );
+
+      // 📊 Measure progress
+      recordRolloutStage(release.tenantId, release.policyId, nextPercentage);
 
       // ✅ If 100% → finalize rollout
       if (nextPercentage === 100) {

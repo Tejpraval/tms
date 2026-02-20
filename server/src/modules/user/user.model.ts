@@ -9,6 +9,7 @@ export interface IUser extends Document {
   password: string;
   role: Role;              // ✅ enum, not string union
   tenantId?: mongoose.Types.ObjectId;
+  customRoleId?: mongoose.Types.ObjectId;
 }
 
 const UserSchema = new Schema<IUser>({
@@ -22,6 +23,10 @@ const UserSchema = new Schema<IUser>({
   tenantId: {
     type: Schema.Types.ObjectId,
     ref: "Tenant",
+  },
+  customRoleId: {
+    type: Schema.Types.ObjectId,
+    ref: "Role",
   },
 });
 
