@@ -2,7 +2,7 @@
 import { PolicyRelease } from "./policyRelease.model";
 import { PolicyVersion } from "./policyVersion.model";
 import { scorePolicyRisk } from "../policy-simulation/risk/risk.scorer";
-import {  compareVersions } from "../policy-simulation/engine/diff.engine";
+import { compareVersions } from "../policy-simulation/engine/diff.engine";
 import { Policy } from "./policy.model";
 
 export async function expandRollout(
@@ -25,20 +25,20 @@ export async function expandRollout(
     throw new Error("Version not found");
   }
 
-const ruleDiff = await compareVersions(
-  base.policyId,
-  base.version,
-  candidate.version
-);
+  const ruleDiff = await compareVersions(
+    base.policy.toString(),
+    base.version,
+    candidate.version
+  );
 
-// Convert RuleDiff → risk input format
-const riskResult = scorePolicyRisk({
-  abacChanges: ruleDiff.modified.map(m => ({
-    action: m.after.action ?? "UNKNOWN",
-    from: "DENY",
-    to: "ALLOW",
-  })),
-});
+  // Convert RuleDiff → risk input format
+  const riskResult = scorePolicyRisk({
+    abacChanges: ruleDiff.modified.map(m => ({
+      action: m.after.action ?? "UNKNOWN",
+      from: "DENY",
+      to: "ALLOW",
+    })),
+  });
 
 
 

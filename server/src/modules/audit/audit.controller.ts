@@ -7,7 +7,12 @@ export const listRecentAudit: RequestHandler = async (
   res
 ) => {
   try {
-    const audits = await AuditLog.find()
+    const query: any = {};
+    if (req.user?.role !== "SUPER_ADMIN" && req.user?.tenantId) {
+      query.tenantId = req.user.tenantId;
+    }
+
+    const audits = await AuditLog.find(query)
       .sort({ createdAt: -1 })
       .limit(20)
       .lean();

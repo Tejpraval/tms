@@ -17,7 +17,7 @@ export interface Policy {
 
   createdAt?: string;
   updatedAt?: string;
-   metadata: {
+  metadata?: {
     policyId: string;
     activeVersion: number;
   };

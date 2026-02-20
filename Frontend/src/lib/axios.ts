@@ -3,7 +3,6 @@ import axios from "axios";
 import type {
   AxiosError,
   AxiosInstance,
-  AxiosResponse,
   InternalAxiosRequestConfig,
 } from "axios";
 
@@ -15,7 +14,7 @@ import type { ApiErrorResponse } from "@/types/api.types";
 --------------------------------------------- */
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: ENV.API_BASE_URL,
+  baseURL: ENV.API_BASE_URL || "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -50,7 +49,10 @@ apiClient.interceptors.request.use(
 --------------------------------------------- */
 
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (res) => {
+    console.log('<< API RES ', res.config.url, res.data);
+    return res;
+  },
   (error: AxiosError<ApiErrorResponse>) => {
     const serverError = error.response?.data;
 

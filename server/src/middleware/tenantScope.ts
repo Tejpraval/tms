@@ -6,6 +6,12 @@ export const enforceTenantScope = (
   res: Response,
   next: NextFunction
 ) => {
+  if (req.user?.role === 'SUPER_ADMIN') {
+    return res.status(403).json({
+      message: "Platform users cannot access tenant APIs",
+    });
+  }
+
   const userTenantId = req.user?.tenantId;
   const targetTenantId = req.params.tenantId;
 

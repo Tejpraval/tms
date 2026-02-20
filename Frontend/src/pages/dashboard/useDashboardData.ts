@@ -36,6 +36,9 @@ export const useDashboardData = () => {
     refetchInterval: 20000,
   });
 
+  console.log("Dashboard Policies: ", policiesQuery.data);
+  console.log("Dashboard Approvals: ", approvalsQuery.data);
+
   return {
     policies: policiesQuery.data ?? [],
     approvals: approvalsQuery.data ?? [],

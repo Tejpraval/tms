@@ -1,0 +1,218 @@
+{
+  "policies": [
+    {
+      "_id": "698ffef65bc702c6bc44b44b",
+      "policyId": "tenant-access",
+      "name": "Tenant Access Policy",
+      "activeVersion": 6,
+      "latestVersion": 6,
+      "tags": [],
+      "updatedAt": "2026-02-19T18:16:00.317Z",
+      "releaseMode": "STATIC",
+      "tenantId": "6988327c6a3c6ecd1d8b0452"
+    }
+  ],
+  "approvals": [
+    {
+      "_id": "6989e707033dc6657543a878",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "04c4b29f-9fbf-4111-9f1f-6bb3f9606135",
+      "riskScore": 10,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-09T13:54:15.126Z",
+      "createdAt": "2026-02-09T13:54:15.128Z",
+      "__v": 0,
+      "executedAt": "2026-02-11T15:48:16.354Z"
+    },
+    {
+      "_id": "6989e79e033dc6657543a87b",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "572f604f-f2d5-47fc-bc95-9de5b4195729",
+      "riskScore": 70,
+      "riskSeverity": "HIGH",
+      "status": "APPROVED",
+      "createdAt": "2026-02-09T13:56:46.861Z",
+      "__v": 0,
+      "decidedAt": "2026-02-10T14:30:46.580Z",
+      "decidedBy": "ADMIN"
+    },
+    {
+      "_id": "698b44a13d47654c921e682c",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "5450876a-36fa-41bc-9a79-16bc28e48159",
+      "riskScore": 70,
+      "riskSeverity": "HIGH",
+      "status": "REJECTED",
+      "createdAt": "2026-02-10T14:45:53.779Z",
+      "__v": 0,
+      "decidedAt": "2026-02-10T14:48:47.798Z",
+      "decidedBy": "ADMIN"
+    },
+    {
+      "_id": "698ca261a24b324130c416f7",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "c6cdcb82-795a-4975-beec-fe0505c70b1f",
+      "riskScore": 70,
+      "riskSeverity": "HIGH",
+      "status": "APPROVED",
+      "createdAt": "2026-02-11T15:38:09.136Z",
+      "__v": 0,
+      "decidedAt": "2026-02-11T15:47:17.152Z",
+      "decidedBy": "ADMIN"
+    },
+    {
+      "_id": "698ca511a3b50b93db39dc7b",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "fba8b86a-f36f-4c9b-9d9d-eb51c97b6f2e",
+      "riskScore": 70,
+      "riskSeverity": "HIGH",
+      "status": "APPROVED",
+      "createdAt": "2026-02-11T15:49:37.859Z",
+      "__v": 0,
+      "decidedAt": "2026-02-17T05:53:40.780Z",
+      "decidedBy": "ADMIN"
+    },
+    {
+      "_id": "6990d6040b31b4dd2b0e3a1c",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "175b5d01-f3a6-43d7-afd8-70243caa3d63",
+      "riskScore": 0,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-14T20:07:32.832Z",
+      "createdAt": "2026-02-14T20:07:32.834Z",
+      "__v": 0
+    },
+    {
+      "_id": "6990db09a634cf3c8e667ec5",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "fa390a73-3aa3-423d-8b02-234287e9288f",
+      "riskScore": 0,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-14T20:28:57.637Z",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 5
+      },
+      "createdAt": "2026-02-14T20:28:57.640Z",
+      "__v": 0,
+      "executedAt": "2026-02-14T20:30:54.046Z"
+    },
+    {
+      "_id": "6990dbefa634cf3c8e667ed5",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "708cc184-dfb2-40b5-8e9a-7e27425a1f1b",
+      "riskScore": 0,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-14T20:32:47.344Z",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 5
+      },
+      "createdAt": "2026-02-14T20:32:47.345Z",
+      "__v": 0
+    },
+    {
+      "_id": "6990dcfda634cf3c8e667edd",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "aca6ad2f-f2e1-48b6-8827-fb14a85bc159",
+      "riskScore": 50,
+      "riskSeverity": "HIGH",
+      "status": "APPROVED",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 5
+      },
+      "createdAt": "2026-02-14T20:37:17.379Z",
+      "__v": 0,
+      "decidedAt": "2026-02-14T20:40:50.103Z",
+      "decidedBy": "ADMIN",
+      "executedAt": "2026-02-14T20:41:57.729Z"
+    },
+    {
+      "_id": "6990e0698da7e27cd10fe599",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "98c5f50b-f7c2-4123-9427-8cc9109f2f73",
+      "riskScore": 50,
+      "riskSeverity": "HIGH",
+      "status": "APPROVED",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 5
+      },
+      "createdAt": "2026-02-14T20:51:53.747Z",
+      "__v": 0,
+      "decidedAt": "2026-02-17T05:59:23.030Z",
+      "decidedBy": "ADMIN"
+    },
+    {
+      "_id": "6994015edbb76e4fd85846ef",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "05b2c6ef-902c-449c-a72f-3a3c6faafd05",
+      "riskScore": 10,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-17T05:49:18.603Z",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 6
+      },
+      "createdAt": "2026-02-17T05:49:18.605Z",
+      "__v": 0
+    },
+    {
+      "_id": "699405f4dbb76e4fd8584710",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "0688fd91-dcad-466f-b7a6-38b10ec00f2b",
+      "riskScore": 10,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-17T06:08:52.164Z",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 6
+      },
+      "createdAt": "2026-02-17T06:08:52.165Z",
+      "__v": 0
+    },
+    {
+      "_id": "6994069773c44ece4e799feb",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "a54a0e8a-47ed-40dd-bdf0-03fc6217ff44",
+      "riskScore": 30,
+      "riskSeverity": "MEDIUM",
+      "status": "PENDING",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 6
+      },
+      "createdAt": "2026-02-14T00:00:00.000Z",
+      "__v": 0
+    },
+    {
+      "_id": "6997447ea890f4a2aa167ebb",
+      "tenantId": "6988327c6a3c6ecd1d8b0452",
+      "simulationId": "b1bce76d-415b-4b26-9097-4c8ed3fb3131",
+      "riskScore": 10,
+      "riskSeverity": "LOW",
+      "status": "APPROVED",
+      "decidedBy": "SYSTEM",
+      "decidedAt": "2026-02-19T17:12:30.472Z",
+      "metadata": {
+        "policyId": "tenant-access",
+        "version": 6
+      },
+      "createdAt": "2026-02-19T17:12:30.474Z",
+      "__v": 0
+    }
+  ]
+}

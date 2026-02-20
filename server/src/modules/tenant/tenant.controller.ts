@@ -93,3 +93,14 @@ export const getTenantById = async (req: Request, res: Response) => {
   res.json(tenant);
 };
 
+/**
+ * GET ALL TENANTS (SUPER_ADMIN ONLY)
+ */
+export const getAllTenants = async (req: Request, res: Response) => {
+  const tenants = await Tenant.find({}, '_id name createdAt').lean();
+  res.json({
+    success: true,
+    data: tenants
+  });
+};
+

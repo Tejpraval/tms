@@ -2,6 +2,8 @@
 import { PERMISSION_RISK } from "./permission.weights";
 import { RiskResult } from "./risk.types";
 
+import { recordRiskScore } from "../../../observability";
+
 export function scorePolicyRisk(input: {
   rbacDiffs?: Record<
     string,
@@ -40,6 +42,9 @@ export function scorePolicyRisk(input: {
       }
     }
   }
+
+  // 📊 Metric
+  recordRiskScore(score);
 
   return {
     score,

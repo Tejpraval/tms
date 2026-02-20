@@ -142,8 +142,8 @@ export const compareVersions = async (
   v1: number,
   v2: number
 ) => {
-  const version1 = await PolicyVersion.findOne({ policyId, version: v1 });
-  const version2 = await PolicyVersion.findOne({ policyId, version: v2 });
+  const version1 = await PolicyVersion.findOne({ policy: policyId, version: v1 });
+  const version2 = await PolicyVersion.findOne({ policy: policyId, version: v2 });
 
   if (!version1 || !version2) {
     throw new Error("One or both policy versions not found");

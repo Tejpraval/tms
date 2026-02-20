@@ -1,6 +1,11 @@
-//D:\resumeproject\server\src\modules\policy-versioning\policyVersion.routes.ts
 import { Router } from "express";
+import { Permission } from "../../constants/permissions";
+import { requirePermission } from "../../middleware/requirePermission";
+import authMiddleware from "../../middleware/auth.middleware";
 import {
+  listPolicies,
+  getPolicyById,
+  createPolicy,
   createDraft,
   activate,
   rollback,
@@ -8,19 +13,26 @@ import {
   listVersions
 } from "./policyVersion.controller";
 
-import  authMiddleware  from "../../middleware/auth.middleware";
-import { requirePermission } from "../../middleware/requirePermission";
-import { Permission } from "../../constants/permissions";
-import { listPolicies, getPolicyById } from "./policyVersion.controller";
-
 const router = Router();
+
+// Apply authentication globally to all versioning routes
+router.use(authMiddleware);
+
+/**
+ * POST /policies/
+ * ROOT Creation Foundation Endpoint
+ */
+router.post(
+  "/",
+  requirePermission(Permission.POLICY_WRITE),
+  createPolicy
+);
 
 /**
  * POST /policies/:id/draft
  */
 router.post(
   "/:id/draft",
-  authMiddleware,
   requirePermission(Permission.POLICY_WRITE),
   createDraft
 );
@@ -30,7 +42,6 @@ router.post(
  */
 router.post(
   "/:id/activate/:version",
-  authMiddleware,
   requirePermission(Permission.POLICY_APPROVE),
   activate
 );
@@ -40,7 +51,6 @@ router.post(
  */
 router.post(
   "/:id/rollback/:version",
-  authMiddleware,
   requirePermission(Permission.POLICY_ADMIN),
   rollback
 );
@@ -50,7 +60,6 @@ router.post(
  */
 router.get(
   "/:id/compare",
-  authMiddleware,
   requirePermission(Permission.POLICY_READ),
   compare
 );
@@ -60,13 +69,20 @@ router.get(
  */
 router.get(
   "/:id/versions",
-  authMiddleware,
   requirePermission(Permission.POLICY_READ),
   listVersions
 );
 
-router.get("/", listPolicies);
-router.get("/:id", getPolicyById);
+router.get(
+  "/",
+  requirePermission(Permission.POLICY_READ),
+  listPolicies
+);
 
+router.get(
+  "/:id",
+  requirePermission(Permission.POLICY_READ),
+  getPolicyById
+);
 
 export default router;

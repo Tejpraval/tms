@@ -106,9 +106,12 @@ export const rollbackReleaseHandler: RequestHandler =
 export const listActiveReleases: RequestHandler =
   async (req, res, next) => {
     try {
-      const releases = await PolicyRelease.find({
-        status: "ACTIVE",
-      }).lean();
+      const query: any = { status: "ACTIVE" };
+      if (req.user?.role !== "SUPER_ADMIN" && req.user?.tenantId) {
+        query.tenantId = req.user.tenantId;
+      }
+
+      const releases = await PolicyRelease.find(query).lean();
 
       res.json({
         success: true,
@@ -119,7 +122,7 @@ export const listActiveReleases: RequestHandler =
     }
   };
 
-export const  getReleaseByPolicy: RequestHandler = async (
+export const getReleaseByPolicy: RequestHandler = async (
   req,
   res
 ) => {
@@ -139,7 +142,7 @@ export const  getReleaseByPolicy: RequestHandler = async (
       message: err.message
     });
   }
-}  
+}
 
 export const updateReleaseStatus: RequestHandler =
   async (req, res, next) => {
