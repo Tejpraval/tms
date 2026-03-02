@@ -10,7 +10,8 @@ import {
   activate,
   rollback,
   compare,
-  listVersions
+  listVersions,
+  getVersionDiff
 } from "./policyVersion.controller";
 
 const router = Router();
@@ -71,6 +72,15 @@ router.get(
   "/:id/versions",
   requirePermission(Permission.POLICY_READ),
   listVersions
+);
+
+/**
+ * GET /policies/:policyId/versions/:versionId/diff
+ */
+router.get(
+  "/:policyId/versions/:versionId/diff",
+  requirePermission(Permission.POLICY_READ),
+  getVersionDiff
 );
 
 router.get(

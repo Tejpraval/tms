@@ -4,6 +4,7 @@ export type VersionStatus =
     | "draft"
     | "pending_approval"
     | "approved"
+    | "rejected"
     | "active"
     | "deprecated"
     | "rolled_back";

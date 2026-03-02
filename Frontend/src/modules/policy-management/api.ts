@@ -35,20 +35,20 @@ export const policyApi = {
     },
 
     // Approve a Simulation
-    approvePolicy: async (simulationId: string, comment?: string) => {
-        const res = await apiClient.post("/policy-approval/approve", { simulationId, comment });
+    approvePolicy: async (payload: { policyId: string; version: number; comment?: string }) => {
+        const res = await apiClient.post("/policy-approval/approve", payload);
         return res.data;
     },
 
     // Reject a Simulation
-    rejectPolicy: async (simulationId: string, comment?: string) => {
-        const res = await apiClient.post("/policy-approval/reject", { simulationId, comment });
+    rejectPolicy: async (payload: { policyId: string; version: number; comment?: string }) => {
+        const res = await apiClient.post("/policy-approval/reject", payload);
         return res.data;
     },
 
     // Execute an Approved Policy Segment
-    executePolicy: async (simulationId: string) => {
-        const res = await apiClient.post("/policy-execution/execute", { simulationId });
+    executePolicy: async (payload: { policyId: string; version: number }) => {
+        const res = await apiClient.post("/policy-execution/execute", payload);
         return res.data;
     },
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import type { PolicyVersion } from "../types";
 import type { UnifiedSimulationResult } from "../../simulation/types";
 import { StatusBadge } from "./StatusBadge";
@@ -21,7 +21,6 @@ export const VersionTable: React.FC<VersionTableProps> = ({
     versions,
     onSimulationSuccess,
 }) => {
-    const [targetSimulationId] = useState(""); // Simplified state mocking for demo purposes
     const simulateMutation = useSimulatePolicy(policyId);
     const approveMutation = useApprovePolicy(policyId);
     const executeMutation = useExecutePolicy(policyId);
@@ -60,7 +59,7 @@ export const VersionTable: React.FC<VersionTableProps> = ({
                         <div className="flex gap-2">
                             <button
                                 onClick={() =>
-                                    approveMutation.mutate({ simulationId: targetSimulationId || "demo-sim-id" })
+                                    approveMutation.mutate({ version: version.version })
                                 }
                                 disabled={approveMutation.isPending}
                                 className="inline-flex items-center px-2 py-1 text-xs font-medium rounded text-green-700 bg-green-100 hover:bg-green-200 disabled:opacity-50"
@@ -74,7 +73,7 @@ export const VersionTable: React.FC<VersionTableProps> = ({
             case "approved":
                 return (
                     <button
-                        onClick={() => executeMutation.mutate(targetSimulationId || "demo-sim-id")}
+                        onClick={() => executeMutation.mutate(version.version)}
                         disabled={executeMutation.isPending}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none disabled:opacity-50 shadow-sm"
                     >

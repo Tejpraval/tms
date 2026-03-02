@@ -26,9 +26,16 @@ export async function approveSimulation(
   res: Response
 ) {
   try {
-    const { simulationId, comment } = req.body;
+    const { simulationId, policyId, version, comment } = req.body;
 
-    const existingApproval = await PolicyApproval.findOne({ simulationId });
+    let existingApproval;
+
+    if (simulationId) {
+      existingApproval = await PolicyApproval.findOne({ simulationId });
+    } else if (policyId && version !== undefined) {
+      existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "PENDING" });
+    }
+
     if (!existingApproval) {
       return res.status(404).json({ message: "Approval not found" });
     }
@@ -37,7 +44,7 @@ export async function approveSimulation(
     }
 
     const approval = await decideApproval({
-      simulationId,
+      simulationId: existingApproval.simulationId,
       actorRole: mapRoleToApprovalActor(req.user.role),
       decision: "APPROVE",
       comment,
@@ -54,9 +61,16 @@ export async function rejectSimulation(
   res: Response
 ) {
   try {
-    const { simulationId, comment } = req.body;
+    const { simulationId, policyId, version, comment } = req.body;
 
-    const existingApproval = await PolicyApproval.findOne({ simulationId });
+    let existingApproval;
+
+    if (simulationId) {
+      existingApproval = await PolicyApproval.findOne({ simulationId });
+    } else if (policyId && version !== undefined) {
+      existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "PENDING" });
+    }
+
     if (!existingApproval) {
       return res.status(404).json({ message: "Approval not found" });
     }
@@ -65,7 +79,7 @@ export async function rejectSimulation(
     }
 
     const approval = await decideApproval({
-      simulationId,
+      simulationId: existingApproval.simulationId,
       actorRole: mapRoleToApprovalActor(req.user.role),
       decision: "REJECT",
       comment,

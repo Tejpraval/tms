@@ -99,8 +99,8 @@ export function useSimulatePolicy(policyId: string) {
 export function useApprovePolicy(policyId: string) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ simulationId, comment }: { simulationId: string; comment?: string }) =>
-            policyApi.approvePolicy(simulationId, comment),
+        mutationFn: (payload: { version: number; comment?: string }) =>
+            policyApi.approvePolicy({ policyId, ...payload }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: policyKeys.versions(policyId) });
             toast.success("Policy approved.");
@@ -114,8 +114,8 @@ export function useApprovePolicy(policyId: string) {
 export function useRejectPolicy(policyId: string) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ simulationId, comment }: { simulationId: string; comment?: string }) =>
-            policyApi.rejectPolicy(simulationId, comment),
+        mutationFn: (payload: { version: number; comment?: string }) =>
+            policyApi.rejectPolicy({ policyId, ...payload }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: policyKeys.versions(policyId) });
             toast.success("Policy rejected.");
@@ -130,7 +130,7 @@ export function useRejectPolicy(policyId: string) {
 export function useExecutePolicy(policyId: string) {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (simulationId: string) => policyApi.executePolicy(simulationId),
+        mutationFn: (version: number) => policyApi.executePolicy({ policyId, version }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: policyKeys.versions(policyId) });
             toast.success("Policy activated successfully.");

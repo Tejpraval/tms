@@ -7,7 +7,7 @@ const policyVersionSchema = new Schema({
 
   status: {
     type: String,
-    enum: ["draft", "pending_approval", "active", "deprecated", "rolled_back"],
+    enum: ["draft", "pending_approval", "approved", "rejected", "active", "deprecated", "rolled_back"],
     default: "draft"
   },
 

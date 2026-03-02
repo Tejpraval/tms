@@ -10,9 +10,15 @@ export async function executePolicy(
   res: Response
 ) {
   try {
-    const { simulationId } = req.body;
+    const { simulationId, policyId, version } = req.body;
 
-    const existingApproval = await PolicyApproval.findOne({ simulationId });
+    let existingApproval;
+
+    if (simulationId) {
+      existingApproval = await PolicyApproval.findOne({ simulationId });
+    } else if (policyId && version !== undefined) {
+      existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "APPROVED" });
+    }
     if (!existingApproval) {
       return res.status(404).json({ message: "Approval not found" });
     }
@@ -20,7 +26,7 @@ export async function executePolicy(
       return res.status(400).json({ message: `Illegal transition: Cannot execute from state ${existingApproval.status}` });
     }
 
-    const result = await executeApprovedPolicy(simulationId);
+    const result = await executeApprovedPolicy(existingApproval.simulationId);
 
     res.json(result);
   } catch (err: any) {

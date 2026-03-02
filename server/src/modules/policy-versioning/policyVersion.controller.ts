@@ -234,3 +234,60 @@ export const getPolicyById = async (req: Request, res: Response) => {
     data: policy,
   });
 };
+
+// -----------------------------
+// Get Version Diff
+// -----------------------------
+export const getVersionDiff = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { policyId, versionId } = req.params;
+    const { compareTo } = req.query;
+
+    if (!compareTo) {
+      return res.status(400).json({ message: "compareTo query parameter is required" });
+    }
+
+    const version1 = await PolicyVersion.findOne({ policy: policyId, version: Number(versionId) }).lean();
+    const version2 = await PolicyVersion.findOne({ policy: policyId, version: Number(compareTo) }).lean();
+
+    if (!version1 || !version2) {
+      return res.status(404).json({ message: "One or both policy versions not found" });
+    }
+
+    const changes: { field: string; before: unknown; after: unknown }[] = [];
+
+    // Diff Rules
+    const r1 = version1.rules || {};
+    const r2 = version2.rules || {};
+
+    const allRuleKeys = new Set([...Object.keys(r1), ...Object.keys(r2)]);
+    for (const key of allRuleKeys) {
+      const val1 = (r1 as any)[key];
+      const val2 = (r2 as any)[key];
+      if (JSON.stringify(val1) !== JSON.stringify(val2)) {
+        changes.push({
+          field: `rules.${key}`,
+          before: val1,
+          after: val2,
+        });
+      }
+    }
+
+    // Since tags are typically on the Policy object, we only diff rules if tags isn't versioned. 
+    // Assuming 'tags' was not added to PolicyVersion in Phase 17, but let's check basic diff needs.
+    // The requirement focuses on structural diff of PolicyVersions.
+
+    res.json({
+      success: true,
+      data: {
+        changes
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};

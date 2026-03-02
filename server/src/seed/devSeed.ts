@@ -24,13 +24,30 @@ export async function seedDevData() {
                 role: Role.TENANT_ADMIN,
                 tenantId: tenant._id,
             });
-            console.log("Development seed complete (Created)");
+            console.log("Development seed complete (Created Tenant Admin)");
         } else {
             user.password = hashedPassword;
             user.role = Role.TENANT_ADMIN;
             user.tenantId = tenant._id as any;
             await user.save();
-            console.log("Development seed complete (Updated)");
+            console.log("Development seed complete (Updated Tenant Admin)");
+        }
+
+        let superAdmin = await User.findOne({ email: "superadmin@test.com" });
+        if (!superAdmin) {
+            await User.create({
+                email: "superadmin@test.com",
+                password: hashedPassword,
+                role: Role.SUPER_ADMIN,
+                tenantId: undefined,
+            });
+            console.log("Development seed complete (Created Super Admin)");
+        } else {
+            superAdmin.password = hashedPassword;
+            superAdmin.role = Role.SUPER_ADMIN;
+            superAdmin.tenantId = undefined; // Super Admin has no tenant context natively
+            await superAdmin.save();
+            console.log("Development seed complete (Updated Super Admin)");
         }
     } catch (error) {
         console.error("Failed to seed development data:", error);

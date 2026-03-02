@@ -14,6 +14,7 @@ import TenantRolloutsPage from "@/pages/tenant/TenantRolloutsPage";
 import TenantAuditPage from "@/pages/tenant/TenantAuditPage";
 import TenantRolesPage from "@/pages/tenant/TenantRolesPage";
 import TenantUsersPage from "@/pages/tenant/TenantUsersPage";
+import { ComparisonPage } from "@/modules/version-comparison/pages/ComparisonPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
@@ -83,6 +84,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredPermissions={['TENANT_READ']}>
             <TenantDashboardPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "policies/:policyId/compare",
+        element: (
+          <ProtectedRoute requiredPermissions={['POLICY_READ']}>
+            <ComparisonPage />
           </ProtectedRoute>
         ),
       },
