@@ -1,6 +1,7 @@
 // src/modules/policy-management/hooks.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { policyApi } from "./api";
+import { executionKeys } from "../execution-history/hooks";
 import type { PolicyVersion, SimulatePolicyPayload } from "./types";
 import { toast } from "react-toastify";
 
@@ -133,6 +134,7 @@ export function useExecutePolicy(policyId: string) {
         mutationFn: (version: number) => policyApi.executePolicy({ policyId, version }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: policyKeys.versions(policyId) });
+            queryClient.invalidateQueries({ queryKey: executionKeys.history(policyId) });
             toast.success("Policy activated successfully.");
         },
         onError: (err: any) => {

@@ -41,6 +41,10 @@ import { useRiskForecastTimeline }
   from "@/modules/risk/hooks/useRiskForecastTimeline";
 import { useCollapseProbability }
   from "@/modules/risk/hooks/useCollapseProbability";
+import { VelocityCard } from "@/modules/governance-dashboard/components/VelocityCard";
+import { SLACard } from "@/modules/governance-dashboard/components/SLACard";
+import { RiskTrendChart } from "@/modules/governance-dashboard/components/RiskTrendChart";
+import { DashboardErrorBoundary } from "@/components/ui/DashboardErrorBoundary";
 
 
 const DashboardPage = () => {
@@ -49,8 +53,12 @@ const DashboardPage = () => {
     approvals,
     releases,
     audits,
-    isLoading,
+    analytics: metrics,
+    isLoading: loading,
+    error,
+    dataUpdatedAt
   } = useDashboardData();
+
   const slaMetrics = useApprovalSlaIntelligence(approvals);
   const { score } = useGovernanceRisk({ approvals, releases });
 
@@ -261,24 +269,37 @@ const DashboardPage = () => {
 
   console.log("Executive mode:", isExecutive);
 
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="p-6 text-white">
+      <div className="p-6 text-white text-center flex items-center justify-center min-h-[400px]">
         Loading governance signals...
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <div className="p-6 text-red-400 text-center flex items-center justify-center min-h-[400px]">
+        Error loading dashboard data: {error.message || error}
+      </div>
+    );
+  }
 
   return (
 
     <div className="p-6 text-white">
 
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-blue-400 text-2xl font-semibold">
-          Governance Cockpit
-        </h1>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold font-mono tracking-tight text-emerald-400">Governance Platform</h1>
+          <p className="text-zinc-400 mt-2">Manage policy deployments, enforce compliance, and simulate risk.</p>
+        </div>
+        {dataUpdatedAt && dataUpdatedAt > 0 && (
+          <div className="text-xs text-zinc-500 font-mono">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>
+            Telemetry Synced {Math.round((Date.now() - dataUpdatedAt) / 1000)}s ago
+          </div>
+        )}
         {isExecutive && (
           <button
             onClick={generate}
@@ -398,6 +419,21 @@ const DashboardPage = () => {
 
           <ApprovalSlaIntelligenceCard metrics={slaMetrics} />
 
+          {/* Executive Analytics Extension */}
+          {metrics && (
+            <DashboardErrorBoundary>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <VelocityCard velocity={metrics.policyChangeVelocity} />
+                <SLACard breaches={metrics.approvalSlaBreaches} />
+                <div className="col-span-1 md:col-span-2 mt-2 border border-zinc-800 rounded-2xl overflow-hidden shadow-sm">
+                  <RiskTrendChart data={metrics.riskTrend} />
+                </div>
+              </div>
+            </DashboardErrorBoundary>
+          )}
+        </div>
+        {/* RIGHT SIGNAL PANEL */}
+        <div className="col-span-1 space-y-6">
           {/* KPI Grid */}
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-zinc-900 p-4 rounded-xl">
@@ -445,10 +481,6 @@ const DashboardPage = () => {
               </div>
             </div>
           )}
-        </div>
-
-        {/* RIGHT SIGNAL PANEL */}
-        <div className="col-span-1 space-y-6">
           {!isExecutive && (
             <StressSimulatorPanel
               breach={breachOverride ?? slaMetrics.breachPercentage}

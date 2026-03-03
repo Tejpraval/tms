@@ -12,13 +12,20 @@ import { recordRolloutStage, recordRolloutFailure } from "../../observability";
  * Evaluate risk between base and candidate versions
  */
 async function evaluateReleaseRisk(release: any): Promise<number> {
+  const mongoose = require('mongoose');
+
+  if (!mongoose.Types.ObjectId.isValid(release.baseVersionId) || !mongoose.Types.ObjectId.isValid(release.candidateVersionId)) {
+    console.error("Malformed release version reference (Skipping):", release._id);
+    return 0; // fail-safe
+  }
+
   const base = await PolicyVersion.findById(release.baseVersionId);
   const candidate = await PolicyVersion.findById(
     release.candidateVersionId
   );
 
   if (!base || !candidate) {
-    console.error("Invalid release version reference:", release._id);
+    console.error("Invalid release version reference (Not Found):", release._id);
     return 0; // fail-safe instead of crash
   }
 

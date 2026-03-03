@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { apiClient } from "@/lib/axios";
 import { API } from "@/config/api.routes";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SkeletonTable } from "@/components/ui/Skeleton";
 
-interface AuditEvent {
+interface AuditLog {
     _id: string;
     action: string;
     actor?: string;
@@ -13,7 +15,7 @@ interface AuditEvent {
 }
 
 export default function TenantAuditPage() {
-    const [events, setEvents] = useState<AuditEvent[]>([]);
+    const [logs, setLogs] = useState<AuditLog[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,10 +28,10 @@ export default function TenantAuditPage() {
         setError(null);
         try {
             const { data } = await apiClient.get(API.AUDIT.RECENT);
-            const logs = Array.isArray(data) ? data : data.data || [];
+            const fetchedLogs = Array.isArray(data) ? data : data.data || [];
 
             // Backend handles tenant isolation
-            setEvents(logs);
+            setLogs(fetchedLogs);
         } catch (err: any) {
             setError(err.message || "Failed to load audit stream.");
         } finally {
@@ -43,15 +45,15 @@ export default function TenantAuditPage() {
         return () => clearInterval(interval);
     }, []);
 
-    const actions = useMemo(() => Array.from(new Set(events.map(e => e.action).filter(Boolean))), [events]);
+    const actions = useMemo(() => Array.from(new Set(logs.map(e => e.action).filter(Boolean))), [logs]);
 
     const filteredEvents = useMemo(() => {
-        return events.filter(e => {
+        return logs.filter(e => {
             if (filterAction && e.action !== filterAction) return false;
             if (filterOutcome && e.outcome !== filterOutcome) return false;
             return true;
         });
-    }, [events, filterAction, filterOutcome]);
+    }, [logs, filterAction, filterOutcome]);
 
     const getOutcomeColor = (outcome: string) => {
         switch (outcome) {
@@ -109,10 +111,9 @@ export default function TenantAuditPage() {
                 </div>
             )}
 
-            {loading && events.length === 0 ? (
-                <div className="text-zinc-500 p-12 flex flex-col items-center justify-center space-y-4">
-                    <div className="w-8 h-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
-                    <p>Connecting to secure audit firehose...</p>
+            {loading && logs.length === 0 ? (
+                <div className="py-8">
+                    <SkeletonTable rows={4} />
                 </div>
             ) : filteredEvents.length === 0 ? (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">
@@ -138,7 +139,7 @@ export default function TenantAuditPage() {
                                         {new Date(event.createdAt).toLocaleString()}
                                     </td>
                                     <td className="px-6 py-3">
-                                        <span className={`px-2 py-0.5 border rounded ${getOutcomeColor(event.outcome)}`}>
+                                        <span className={`px - 2 py - 0.5 border rounded ${getOutcomeColor(event.outcome)} `}>
                                             {event.outcome}
                                         </span>
                                     </td>

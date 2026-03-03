@@ -59,6 +59,15 @@ app.use("/api/platform", platformRoutes);
 // Audit
 app.use("/api/audit", auditRoutes);
 
+// Governance Analytics
+import governanceDashboardRoutes from "./modules/governance-dashboard/governance-dashboard.routes";
+app.use("/api/governance-dashboard", governanceDashboardRoutes);
+
+// Super Admin Layer
+import superAdminRoutes from "./modules/super-admin/superAdmin.routes";
+app.use("/api/super-admin", superAdminRoutes);
+
+
 // Users
 app.use("/api/users", userRoutes);
 

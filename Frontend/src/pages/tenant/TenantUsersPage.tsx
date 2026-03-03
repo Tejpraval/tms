@@ -95,7 +95,7 @@ export default function TenantUsersPage() {
 
     return (
         <div className="p-8 text-white max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center bg-zinc-900 p-6 rounded-lg border border-zinc-800">
+            <div className="flex justify-between items-center bg-zinc-900 p-6 rounded-xl border border-zinc-800">
                 <div>
                     <h1 className="text-2xl font-bold font-mono text-emerald-400">Tenant Workspace Access</h1>
                     <p className="text-zinc-400 text-sm mt-1">Isolate and delegate access correctly within your environment.</p>
@@ -119,7 +119,7 @@ export default function TenantUsersPage() {
             {loading ? (
                 <div className="text-zinc-500 p-12 flex justify-center">Loading context directory...</div>
             ) : (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                     <table className="w-full text-left text-sm text-zinc-300">
                         <thead className="bg-zinc-950 text-zinc-500 uppercase tracking-wider text-xs border-b border-zinc-800">
                             <tr>
@@ -131,7 +131,7 @@ export default function TenantUsersPage() {
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
                             {users.map(user => (
-                                <tr key={user._id} className="hover:bg-zinc-800/30 transition-colors">
+                                <tr key={user._id} className="hover:bg-zinc-800/40 transition-colors/30 transition-colors">
                                     <td className="px-6 py-4 font-medium text-zinc-200">{user.email}</td>
                                     <td className="px-6 py-4">
                                         <select
@@ -174,7 +174,7 @@ export default function TenantUsersPage() {
             {/* CREATE MODAL */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                    <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg w-full max-w-md shadow-2xl">
+                    <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl w-full max-w-md shadow-2xl">
                         <h2 className="text-xl font-bold text-white mb-4">Grant Environment Access</h2>
                         <form onSubmit={handleCreateUser} className="space-y-4">
                             <div>

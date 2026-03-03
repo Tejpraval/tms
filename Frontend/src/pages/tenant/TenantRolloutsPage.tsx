@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { API } from "@/config/api.routes";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SkeletonTable } from "@/components/ui/Skeleton";
 
 interface PolicyRelease {
     _id: string;
@@ -83,9 +85,8 @@ export default function TenantRolloutsPage() {
             )}
 
             {loading && releases.length === 0 ? (
-                <div className="text-zinc-500 p-12 flex flex-col items-center justify-center space-y-4">
-                    <div className="w-8 h-8 rounded-full border-2 border-purple-500/20 border-t-purple-500 animate-spin" />
-                    <p>Loading isolated rollout metrics...</p>
+                <div className="py-8">
+                    <SkeletonTable rows={4} />
                 </div>
             ) : releases.length === 0 ? (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">
@@ -98,7 +99,7 @@ export default function TenantRolloutsPage() {
                         const risk = getRiskScore(release);
                         const riskColor = risk > 70 ? "text-red-400" : risk > 40 ? "text-yellow-400" : "text-emerald-400";
                         const stageIndex = release.stages.indexOf(release.rolloutPercentage);
-                        const stageLabel = stageIndex >= 0 ? `Stage ${stageIndex + 1}` : "Custom";
+                        const stageLabel = stageIndex >= 0 ? `Stage ${stageIndex + 1} ` : "Custom";
 
                         return (
                             <div key={release._id} className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 flex flex-col relative overflow-hidden">

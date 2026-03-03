@@ -33,3 +33,35 @@ export async function executePolicy(
     res.status(400).json({ message: err.message });
   }
 }
+
+export async function getExecutionHistory(
+  req: AuthenticatedRequest,
+  res: Response
+) {
+  try {
+    const { policyId } = req.params;
+
+    if (!policyId) {
+      return res.status(400).json({ message: "policyId is required" });
+    }
+
+    const executions = await PolicyApproval.find({
+      policy: policyId,
+      executedAt: { $exists: true, $ne: null }
+    })
+      .sort({ executedAt: -1 })
+      .select("version executedAt decidedBy riskSeverity")
+      .lean();
+
+    const formattedHistory = executions.map(exec => ({
+      versionId: typeof exec.version === 'number' ? exec.version.toString() : exec.version,
+      executedAt: exec.executedAt?.toISOString(),
+      executedBy: exec.decidedBy || "SYSTEM",
+      riskSeverity: exec.riskSeverity
+    }));
+
+    res.json(formattedHistory);
+  } catch (err: any) {
+    res.status(500).json({ message: "Failed to fetch execution history", error: err.message });
+  }
+}

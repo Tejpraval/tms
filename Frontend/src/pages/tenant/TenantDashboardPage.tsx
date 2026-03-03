@@ -1,6 +1,8 @@
 import { useDashboardData } from "@/pages/dashboard/useDashboardData";
 import { useGovernanceRisk } from "@/modules/risk/hooks/useGovernanceRisk";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { SkeletonCard } from "@/components/ui/Skeleton";
 
 export default function TenantDashboardPage() {
     const { policies, approvals, releases, audits, isLoading } = useDashboardData();
@@ -8,9 +10,10 @@ export default function TenantDashboardPage() {
 
     if (isLoading) {
         return (
-            <div className="p-8 text-white flex justify-center items-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-                <span className="ml-3 text-emerald-500 font-mono">Loading Tenant Telemetry...</span>
+            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
             </div>
         );
     }
@@ -27,7 +30,7 @@ export default function TenantDashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {/* Risk Score */}
-                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-sm">
                     <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Live Risk Score</h3>
                     <div className="flex items-baseline gap-2">
                         <span className={`text-4xl font-bold font-mono ${tierColor}`}>{Math.round(score)}</span>
@@ -36,7 +39,7 @@ export default function TenantDashboardPage() {
                 </div>
 
                 {/* Policies Count */}
-                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-sm">
                     <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Managed Policies</h3>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold font-mono text-blue-400">{policies.length}</span>
@@ -44,7 +47,7 @@ export default function TenantDashboardPage() {
                 </div>
 
                 {/* Pending Approvals */}
-                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-sm">
                     <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Pending Approvals</h3>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold font-mono text-yellow-400">{approvals.length}</span>
@@ -52,7 +55,7 @@ export default function TenantDashboardPage() {
                 </div>
 
                 {/* Active Rollouts */}
-                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-lg">
+                <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl shadow-sm">
                     <h3 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">Active Rollouts</h3>
                     <div className="flex items-baseline gap-2">
                         <span className="text-4xl font-bold font-mono text-purple-400">{releases.length}</span>
@@ -62,7 +65,7 @@ export default function TenantDashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Active Rollouts Panel */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex flex-col">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
                         <h3 className="font-semibold text-zinc-300">Active Distributions</h3>
                         <Link to="/rollouts" className="text-xs text-blue-400 hover:text-blue-300">View All →</Link>
@@ -90,7 +93,7 @@ export default function TenantDashboardPage() {
                 </div>
 
                 {/* Recent Audit Panel */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex flex-col">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
                     <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center">
                         <h3 className="font-semibold text-zinc-300">Recent Audit Log</h3>
                         <Link to="/tenant-audit" className="text-xs text-emerald-400 hover:text-emerald-300">View Stream →</Link>
@@ -108,8 +111,8 @@ export default function TenantDashboardPage() {
                                         </div>
                                         <div className="text-right">
                                             <span className={`text-xs px-2 py-1 rounded border ${a.outcome === "ALLOW" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" :
-                                                    a.outcome === "DENY" ? "bg-red-500/10 text-red-400 border-red-500/20" :
-                                                        "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                                                a.outcome === "DENY" ? "bg-red-500/10 text-red-400 border-red-500/20" :
+                                                    "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
                                                 }`}>
                                                 {a.outcome}
                                             </span>

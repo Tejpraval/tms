@@ -30,7 +30,29 @@ export async function seedDevData() {
             user.role = Role.TENANT_ADMIN;
             user.tenantId = tenant._id as any;
             await user.save();
-            console.log("Development seed complete (Updated Tenant Admin)");
+            console.log("Development seed complete (Updated Tenant Admin 1)");
+        }
+
+        let tenant2 = await Tenant.findOne({ name: "TechGlobal" });
+        if (!tenant2) {
+            tenant2 = await Tenant.create({ name: "TechGlobal" });
+        }
+
+        let user2 = await User.findOne({ email: "admin2@test.com" });
+        if (!user2) {
+            await User.create({
+                email: "admin2@test.com",
+                password: hashedPassword,
+                role: Role.TENANT_ADMIN,
+                tenantId: tenant2._id,
+            });
+            console.log("Development seed complete (Created Tenant Admin 2)");
+        } else {
+            user2.password = hashedPassword;
+            user2.role = Role.TENANT_ADMIN;
+            user2.tenantId = tenant2._id as any;
+            await user2.save();
+            console.log("Development seed complete (Updated Tenant Admin 2)");
         }
 
         let superAdmin = await User.findOne({ email: "superadmin@test.com" });

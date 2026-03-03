@@ -3,6 +3,7 @@ import { usePolicies, usePolicyVersions, useCreateDraft } from "../../modules/po
 import { VersionTable } from "../../modules/policy-management/components/VersionTable";
 import { SimulationResultPanel } from "../../modules/simulation/components/SimulationResultPanel";
 import type { UnifiedSimulationResult } from "../../modules/simulation/types";
+import { ExecutionTimeline } from "../../modules/execution-history";
 
 export const PolicyManagementPage: React.FC = () => {
     const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null);
@@ -36,7 +37,7 @@ export const PolicyManagementPage: React.FC = () => {
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-8">
-            <div className="flex justify-between items-center bg-zinc-900 p-6 rounded-lg shadow-sm border border-zinc-800">
+            <div className="flex justify-between items-center bg-zinc-900 p-6 rounded-xl shadow-sm border border-zinc-800">
                 <div>
                     <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Policy Management</h1>
                     <p className="mt-1 text-sm text-zinc-400">
@@ -56,7 +57,7 @@ export const PolicyManagementPage: React.FC = () => {
                                 onClick={() => setSelectedPolicyId(policy._id)}
                                 className={`text-left px-4 py-3 rounded-md border text-sm transition-colors ${selectedPolicyId === policy._id
                                     ? "bg-zinc-800 border-zinc-700 text-indigo-400 font-medium"
-                                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800/80 hover:border-zinc-700"
+                                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:bg-zinc-800/40 transition-colors/80 hover:border-zinc-700"
                                     }`}
                             >
                                 <div className="font-medium">{policy.name}</div>
@@ -75,7 +76,7 @@ export const PolicyManagementPage: React.FC = () => {
                 <div className="col-span-12 md:col-span-8 lg:col-span-9">
                     {selectedPolicyId ? (
                         <div className="flex flex-col space-y-6">
-                            <div className="bg-zinc-900 rounded-lg shadow-sm border border-zinc-800 overflow-hidden">
+                            <div className="bg-zinc-900 rounded-xl shadow-sm border border-zinc-800 overflow-hidden">
                                 <div className="px-6 py-5 border-b border-zinc-800 bg-zinc-800/30 flex justify-between items-center">
                                     <div>
                                         <h2 className="text-lg font-semibold text-zinc-100">{activePolicy?.name}</h2>
@@ -120,9 +121,14 @@ export const PolicyManagementPage: React.FC = () => {
                                     />
                                 </div>
                             )}
+
+                            {/* Execution Timeline */}
+                            <div className="mt-8">
+                                <ExecutionTimeline policyId={selectedPolicyId} />
+                            </div>
                         </div>
                     ) : (
-                        <div className="h-full min-h-[400px] flex items-center justify-center bg-zinc-900 border border-zinc-800 border-dashed rounded-lg">
+                        <div className="h-full min-h-[400px] flex items-center justify-center bg-zinc-900 border border-zinc-800 border-dashed rounded-xl">
                             <div className="text-center">
                                 <svg className="mx-auto h-12 w-12 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

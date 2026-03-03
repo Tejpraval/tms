@@ -1,8 +1,9 @@
 import { usePolicies } from "@/modules/policy-versioning/hooks";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { SkeletonTable } from "@/components/ui/Skeleton";
 
-export default function TenantPoliciesPage() {
+export const TenantPoliciesPage = () => {
     const { data: policies, isLoading } = usePolicies();
     const { role, permissions } = useAuth();
     const navigate = useNavigate();
@@ -11,9 +12,8 @@ export default function TenantPoliciesPage() {
 
     if (isLoading) {
         return (
-            <div className="p-8 text-white flex justify-center items-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
-                <span className="ml-3 text-emerald-500 font-mono">Loading Tenant Policies...</span>
+            <div className="p-6 max-w-7xl mx-auto">
+                <SkeletonTable rows={5} />
             </div>
         );
     }
@@ -26,11 +26,6 @@ export default function TenantPoliciesPage() {
                         <h1 className="text-2xl font-bold font-mono text-blue-400 mb-1">Policy Governance</h1>
                         <p className="text-zinc-400 text-sm">Manage rules and distribution strategies for your tenant.</p>
                     </div>
-                    {hasPermission('POLICY_WRITE') && (
-                        <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors">
-                            + Create Policy
-                        </button>
-                    )}
                 </div>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center text-zinc-500">
                     No policies found in this tenant workspace.
@@ -46,11 +41,6 @@ export default function TenantPoliciesPage() {
                     <h1 className="text-2xl font-bold font-mono text-blue-400 mb-1">Policy Governance</h1>
                     <p className="text-zinc-400 text-sm">Manage rules, simulate outcomes, and request approvals.</p>
                 </div>
-                {hasPermission('POLICY_WRITE') && (
-                    <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors shadow-lg shadow-emerald-500/10">
-                        + Create Policy
-                    </button>
-                )}
             </div>
 
             <div className="bg-zinc-900 rounded-xl border border-zinc-800 overflow-hidden">

@@ -1,7 +1,7 @@
 // src/modules/policy-approval/execution.routes.ts
 
 import { Router, RequestHandler } from "express";
-import { executePolicy } from "./execution.controller";
+import { executePolicy, getExecutionHistory } from "./execution.controller";
 import authMiddleware from "../../middleware/auth.middleware";
 import { requirePermission } from "../../middleware/requirePermission";
 import { Permission } from "../../constants/permissions";
@@ -16,5 +16,10 @@ router.post(
   executePolicy as RequestHandler
 );
 
-export default router;
+router.get(
+  "/:policyId/execution-history",
+  requirePermission(Permission.POLICY_READ),
+  getExecutionHistory as RequestHandler
+);
 
+export default router;

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { API } from "@/config/api.routes";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { SkeletonTable } from "@/components/ui/Skeleton";
 
 interface Tenant {
     _id: string;
@@ -135,10 +137,9 @@ export default function CrossTenantRolloutsPage() {
                 </div>
             )}
 
-            {loading && releases.length === 0 ? (
-                <div className="text-zinc-500 p-12 flex flex-col items-center justify-center space-y-4">
-                    <div className="w-8 h-8 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
-                    <p>Aggregating cross-tenant telemetry...</p>
+            {loading ? (
+                <div className="py-8">
+                    <SkeletonTable rows={4} />
                 </div>
             ) : releases.length === 0 ? (
                 <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">

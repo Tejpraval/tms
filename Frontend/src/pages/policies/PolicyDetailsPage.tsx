@@ -7,10 +7,13 @@ import { VersionTimeline } from "@/modules/policy-versioning/components/VersionT
 import { VersionActionsPanel } from "@/modules/policy-versioning/components/VersionActionsPanel";
 import { RolloutStatusPanel } from "@/modules/rollout/components/RolloutStatusPanel";
 import { usePolicyRelease } from "@/modules/rollout/hooks";
+import { CreateDraftModal } from "@/modules/policy-versioning/components/CreateDraftModal";
+import { useState } from "react";
 
 const PolicyDetailsPage = () => {
   const { policy, versions, isLoading } = usePolicyDetails();
   const releaseQuery = usePolicyRelease(policy?._id);
+  const [isDraftModalOpen, setIsDraftModalOpen] = useState(false);
   if (isLoading) {
     return (
       <div className="p-6 text-white">
@@ -58,6 +61,23 @@ const PolicyDetailsPage = () => {
             <RolloutStatusPanel release={releaseQuery.data} />
           )}
 
+          <div className="bg-zinc-900 rounded-xl p-5 border border-zinc-800">
+            <h3 className="text-sm font-semibold text-zinc-400 uppercase tracking-wide">
+              Development Actions
+            </h3>
+            <button
+              onClick={() => setIsDraftModalOpen(true)}
+              className="w-full mt-4 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded text-sm transition-colors"
+            >
+              + Create Parameterized Draft
+            </button>
+          </div>
+
+          <CreateDraftModal
+            policyId={policy._id}
+            isOpen={isDraftModalOpen}
+            onClose={() => setIsDraftModalOpen(false)}
+          />
 
           {latestVersion && policy.activeVersion && (
             <VersionActionsPanel
