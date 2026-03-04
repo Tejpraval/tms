@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { Role } from './role.model';
 import { User } from '../user/user.model';
 import { Permission } from '../../constants/permissions';
+import { validateRolePermissions } from '../role-validation/roleValidation.service';
 
 export const getRoles = async (req: Request, res: Response) => {
     try {
@@ -35,6 +36,14 @@ export const createRole = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'Invalid permission in array.' });
         }
 
+        const validationResult = validateRolePermissions(permissions);
+        if (!validationResult.isValid) {
+            return res.status(400).json({
+                message: 'Structural Role Validation Failed',
+                errors: validationResult.errors
+            });
+        }
+
         const existing = await Role.findOne({ name, tenantId });
         if (existing) {
             return res.status(409).json({ message: 'Role with this name already exists in this tenant.' });
@@ -65,6 +74,14 @@ export const updateRolePermissions = async (req: Request, res: Response) => {
         const invalid = permissions.some((p: any) => !validPermissions.includes(p));
         if (invalid) {
             return res.status(400).json({ message: 'Invalid permission in array.' });
+        }
+
+        const validationResult = validateRolePermissions(permissions);
+        if (!validationResult.isValid) {
+            return res.status(400).json({
+                message: 'Structural Role Validation Failed',
+                errors: validationResult.errors
+            });
         }
 
         const updated = await Role.findOneAndUpdate(

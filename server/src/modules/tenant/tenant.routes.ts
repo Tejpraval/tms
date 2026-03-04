@@ -9,6 +9,7 @@ import {
   createTenant,
   deleteTenant,
   getAllTenants,
+  toggleTenantStatus
 } from "./tenant.controller";
 import { authorize } from "../../middleware/authorize";
 import { canReadTenant } from "../../policies/tenant.policy";
@@ -26,7 +27,7 @@ const router = Router();
 // );
 
 const requireSuperAdmin = (req: Request, res: Response, next: NextFunction) => {
-  if (req.user?.role !== "SUPER_ADMIN") {
+  if (req.user?.role !== "SUPER_ADMIN" || (req.user as any)?.impersonating) {
     return res.status(403).json({ message: "Super Admin access required" });
   }
   next();
@@ -38,6 +39,13 @@ router.get(
   requireSuperAdmin,
   requirePermission(Permission.TENANT_READ),
   getAllTenants
+);
+
+router.post(
+  "/:id/toggle-status",
+  authMiddleware,
+  requireSuperAdmin,
+  toggleTenantStatus
 );
 
 router.post(

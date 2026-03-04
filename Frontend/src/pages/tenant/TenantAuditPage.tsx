@@ -1,39 +1,34 @@
-import { useState, useEffect, useMemo } from "react";
-import { apiClient } from "@/lib/axios";
-import { API } from "@/config/api.routes";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { SkeletonTable } from "@/components/ui/Skeleton";
+import { type FC, useEffect, useState } from 'react';
+import { useAuth } from '@/context/AuthContext';
 
-interface AuditLog {
+export interface AuditLog {
     _id: string;
+    tenantId: string;
+    userId: string;
     action: string;
-    actor?: string;
-    tenantId?: string;
-    resource?: string;
-    outcome: "ALLOW" | "DENY" | "ERROR";
+    entityType: 'POLICY' | 'VERSION' | 'APPROVAL' | 'ROLE' | 'USER';
+    entityId: string;
+    metadata?: Record<string, unknown>;
     createdAt: string;
 }
 
-export default function TenantAuditPage() {
+export const TenantAuditPage: FC = () => {
+    const { tenantId } = useAuth();
     const [logs, setLogs] = useState<AuditLog[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // Filters
-    const [filterAction, setFilterAction] = useState("");
-    const [filterOutcome, setFilterOutcome] = useState("");
+    const [loading, setLoading] = useState<boolean>(true);
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
     const fetchAuditLogs = async () => {
-        setLoading(true);
-        setError(null);
         try {
-            const { data } = await apiClient.get(API.AUDIT.RECENT);
-            const fetchedLogs = Array.isArray(data) ? data : data.data || [];
-
-            // Backend handles tenant isolation
-            setLogs(fetchedLogs);
-        } catch (err: any) {
-            setError(err.message || "Failed to load audit stream.");
+            setLoading(true);
+            const response = await fetch(`/api/audit/recent?tenantId=${tenantId || 'SYSTEM'}`);
+            if (response.ok) {
+                const data = await response.json();
+                setLogs(data.logs || []);
+                setLastUpdated(new Date());
+            }
+        } catch (e) {
+            console.error("Failed to load audit logs", e);
         } finally {
             setLoading(false);
         }
@@ -41,121 +36,87 @@ export default function TenantAuditPage() {
 
     useEffect(() => {
         fetchAuditLogs();
-        const interval = setInterval(() => { fetchAuditLogs(); }, 15000);
+        // Periodically refresh assuming standard operations dashboard
+        const interval = setInterval(fetchAuditLogs, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [tenantId]);
 
-    const actions = useMemo(() => Array.from(new Set(logs.map(e => e.action).filter(Boolean))), [logs]);
-
-    const filteredEvents = useMemo(() => {
-        return logs.filter(e => {
-            if (filterAction && e.action !== filterAction) return false;
-            if (filterOutcome && e.outcome !== filterOutcome) return false;
-            return true;
-        });
-    }, [logs, filterAction, filterOutcome]);
-
-    const getOutcomeColor = (outcome: string) => {
-        switch (outcome) {
-            case "ALLOW": return "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
-            case "DENY": return "text-red-400 bg-red-400/10 border-red-400/20";
-            case "ERROR": return "text-yellow-400 bg-yellow-400/10 border-yellow-400/20";
-            default: return "text-zinc-400 bg-zinc-800 border-zinc-700";
-        }
+    const getTimeAgo = (date: Date) => {
+        const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+        if (seconds < 60) return `${Math.max(seconds, 0)} seconds ago`;
+        return `${Math.floor(seconds / 60)} minutes ago`;
     };
 
     return (
-        <div className="p-8 text-white max-w-7xl mx-auto space-y-6">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center bg-zinc-900 p-6 rounded-lg border border-zinc-800 gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold font-mono text-emerald-400 flex items-center gap-2">
-                        <span className="animate-pulse">●</span> Audit Stream
-                    </h1>
-                    <p className="text-zinc-400 text-sm mt-1">Real-time security ledger isolated strictly to your tenant workspace.</p>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                    <select
-                        value={filterAction}
-                        onChange={(e) => setFilterAction(e.target.value)}
-                        className="bg-black border border-zinc-800 rounded px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500"
-                    >
-                        <option value="">All Actions</option>
-                        {actions.map(a => <option key={a} value={a}>{a}</option>)}
-                    </select>
-
-                    <select
-                        value={filterOutcome}
-                        onChange={(e) => setFilterOutcome(e.target.value)}
-                        className="bg-black border border-zinc-800 rounded px-3 py-1.5 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500"
-                    >
-                        <option value="">All Outcomes</option>
-                        <option value="ALLOW">ALLOW</option>
-                        <option value="DENY">DENY</option>
-                        <option value="ERROR">ERROR</option>
-                    </select>
-
-                    <button
-                        onClick={fetchAuditLogs}
-                        disabled={loading}
-                        className="bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded text-sm transition-colors disabled:opacity-50"
-                    >
+        <div className="p-6 bg-white rounded-lg shadow-sm h-full overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-semibold text-gray-800">Governance Audit Trail</h1>
+                <div className="flex items-center space-x-4">
+                    {lastUpdated && (
+                        <span className="text-sm text-gray-500">
+                            Last updated {getTimeAgo(lastUpdated)}
+                        </span>
+                    )}
+                    <button onClick={fetchAuditLogs} className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-md transition-colors text-sm font-medium">
                         Refresh
                     </button>
                 </div>
             </div>
 
-            {error && (
-                <div className="p-4 bg-red-900/40 border border-red-500/50 text-red-200 rounded">
-                    {error}
+            {loading ? (
+                // Skeleton Loader
+                <div className="space-y-4 animate-pulse">
+                    {[1, 2, 3, 4, 5].map(i => (
+                        <div key={i} className="flex space-x-4 border-b border-gray-100 pb-4">
+                            <div className="h-10 w-10 bg-gray-200 rounded-full flex-shrink-0" />
+                            <div className="flex-1 space-y-2 py-1">
+                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                <div className="space-y-2">
+                                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            )}
-
-            {loading && logs.length === 0 ? (
-                <div className="py-8">
-                    <SkeletonTable rows={4} />
-                </div>
-            ) : filteredEvents.length === 0 ? (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-12 text-center">
-                    <h3 className="text-zinc-300 font-semibold text-lg">No Audit Events</h3>
-                    <p className="text-zinc-500 text-sm mt-2">No infrastructure events match the current filter criteria for this tenant.</p>
+            ) : logs.length === 0 ? (
+                // Empty State
+                <div className="text-center py-12 flex flex-col items-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">No Audit Logs Found</h3>
+                    <p className="text-gray-500 text-sm max-w-sm">There are currently no recorded governance actions for your tenant space.</p>
                 </div>
             ) : (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-                    <table className="w-full text-left text-sm text-zinc-300">
-                        <thead className="bg-zinc-950 text-zinc-500 border-b border-zinc-800">
-                            <tr>
-                                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Timestamp</th>
-                                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Outcome</th>
-                                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Action</th>
-                                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Actor</th>
-                                <th className="px-6 py-4 font-semibold uppercase tracking-wider text-xs">Resource</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-800/50">
-                            {filteredEvents.map(event => (
-                                <tr key={event._id} className="hover:bg-zinc-800/30 transition-colors font-mono text-xs">
-                                    <td className="px-6 py-3 text-zinc-400 whitespace-nowrap">
-                                        {new Date(event.createdAt).toLocaleString()}
-                                    </td>
-                                    <td className="px-6 py-3">
-                                        <span className={`px - 2 py - 0.5 border rounded ${getOutcomeColor(event.outcome)} `}>
-                                            {event.outcome}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-3 font-semibold text-zinc-200">{event.action}</td>
-                                    <td className="px-6 py-3 text-zinc-400 truncate max-w-[150px]" title={event.actor}>
-                                        {event.actor || 'SYSTEM'}
-                                    </td>
-                                    <td className="px-6 py-3 text-zinc-500 truncate max-w-[150px]" title={event.resource}>
-                                        {event.resource || '--'}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                // Real Audit Logs mapped directly
+                <div className="space-y-4">
+                    {logs.map(log => (
+                        <div key={log._id} className="flex items-start p-4 hover:bg-gray-50 rounded-lg transition-colors border border-gray-100">
+                            <div className="flex-shrink-0 pt-1">
+                                {/* Semantic Icons based on EntityType can be rendered here */}
+                                <span className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-blue-100 mr-3">
+                                    <span className="text-sm font-medium leading-none text-blue-700">{log.entityType[0]}</span>
+                                </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 break-words">
+                                    {log.action}
+                                    <span className="mx-2 text-gray-400">•</span>
+                                    <span className="text-xs px-2 py-1 bg-gray-100 rounded-md text-gray-600">{log.entityType}</span>
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    User: <span className="font-medium text-gray-700">{log.userId}</span> • Entity ID: <span className="font-mono">{log.entityId}</span>
+                                </p>
+                            </div>
+                            <div className="flex-shrink-0 whitespace-nowrap text-xs text-gray-400 pl-4 pt-1">
+                                {new Date(log.createdAt).toLocaleString()}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
         </div>
     );
-}
+};
+
+export default TenantAuditPage;

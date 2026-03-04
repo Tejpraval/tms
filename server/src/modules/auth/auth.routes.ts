@@ -5,7 +5,9 @@ import {
   login,
   refresh,
   logout,
-  getMe
+  getMe,
+  impersonate,
+  exitImpersonation
 } from './auth.controller';
 import { csrfMiddleware } from '../../middleware/csrf.middleware';
 import authMiddleware from '../../middleware/auth.middleware';
@@ -34,5 +36,9 @@ router.post('/logout', csrfMiddleware, logout);
 
 // Protected routes
 router.get('/me', authMiddleware, getMe);
+
+// Impersonation routes (Super Admin only - secured within controller)
+router.post('/impersonate', authMiddleware, impersonate);
+router.post('/impersonate/exit', authMiddleware, exitImpersonation);
 
 export default router;

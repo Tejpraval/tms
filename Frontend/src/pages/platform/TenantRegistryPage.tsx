@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { API } from "@/config/api.routes";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface Tenant {
     _id: string;
     name: string;
     email: string;
     phone: string;
+    status?: 'ACTIVE' | 'SUSPENDED';
     createdAt?: string;
 }
 
@@ -14,6 +17,8 @@ export default function TenantRegistryPage() {
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -80,6 +85,31 @@ export default function TenantRegistryPage() {
         }
     };
 
+    const handleToggleStatus = async (id: string, currentStatus?: string) => {
+        const action = currentStatus === 'SUSPENDED' ? 'Activate' : 'Suspend';
+        if (!window.confirm(`Are you sure you want to ${action} this tenant?`)) return;
+
+        try {
+            // Assuming we added /api/tenant/:id/toggle-status
+            const { data } = await apiClient.post(`/tenant/${id}/toggle-status`);
+            const updated = tenants.map(t => t._id === id ? { ...t, status: data.tenant.status } : t);
+            setTenants(updated);
+            localStorage.setItem("platform_tenants", JSON.stringify(updated));
+        } catch (err: any) {
+            alert(err.response?.data?.message || err.message || "Failed to toggle status");
+        }
+    };
+
+    const handleImpersonate = async (id: string) => {
+        try {
+            const { data } = await apiClient.post("/auth/impersonate", { targetTenantId: id });
+            await login({ accessToken: data.accessToken });
+            navigate("/dashboard");
+        } catch (err: any) {
+            alert(err.response?.data?.message || err.message || "Failed to initiate impersonation context.");
+        }
+    };
+
     return (
         <div className="p-8 text-white max-w-7xl mx-auto space-y-6">
             <div className="flex justify-between items-center bg-zinc-900 p-6 rounded-lg border border-zinc-800">
@@ -115,7 +145,7 @@ export default function TenantRegistryPage() {
                             <tr>
                                 <th className="px-6 py-4 font-semibold">Tenant Name</th>
                                 <th className="px-6 py-4 font-semibold">Tenant ID</th>
-                                <th className="px-6 py-4 font-semibold">Contact Email</th>
+                                <th className="px-6 py-4 font-semibold">Status</th>
                                 <th className="px-6 py-4 font-semibold">Created At</th>
                                 <th className="px-6 py-4 font-semibold text-right">Actions</th>
                             </tr>
@@ -123,13 +153,36 @@ export default function TenantRegistryPage() {
                         <tbody className="divide-y divide-zinc-800/50">
                             {tenants.map(t => (
                                 <tr key={t._id} className="hover:bg-zinc-800/30 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-white">{t.name}</td>
+                                    <td className="px-6 py-4 font-medium text-white">
+                                        <div>{t.name}</div>
+                                        <div className="text-xs text-zinc-500 font-normal">{t.email}</div>
+                                    </td>
                                     <td className="px-6 py-4 text-zinc-500 font-mono text-xs">{t._id}</td>
-                                    <td className="px-6 py-4 text-zinc-400">{t.email}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-2 py-1 text-xs rounded border ${t.status === 'SUSPENDED'
+                                            ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                            }`}>
+                                            {t.status || 'ACTIVE'}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-4 text-zinc-500">
                                         {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : 'N/A'}
                                     </td>
-                                    <td className="px-6 py-4 text-right">
+                                    <td className="px-6 py-4 text-right space-x-2 flex justify-end">
+                                        <button
+                                            onClick={() => handleImpersonate(t._id)}
+                                            className="text-blue-400 hover:text-blue-300 font-medium px-3 py-1 bg-blue-400/10 hover:bg-blue-400/20 rounded transition-colors"
+                                        >
+                                            Impersonate
+                                        </button>
+                                        <button
+                                            onClick={() => handleToggleStatus(t._id, t.status)}
+                                            className={`${t.status === 'SUSPENDED' ? 'text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 hover:text-emerald-300' : 'text-orange-400 bg-orange-400/10 hover:bg-orange-400/20 hover:text-orange-300'
+                                                } font-medium px-3 py-1 rounded transition-colors`}
+                                        >
+                                            {t.status === 'SUSPENDED' ? 'Activate' : 'Suspend'}
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(t._id, t.name)}
                                             className="text-red-400 hover:text-red-300 font-medium px-3 py-1 bg-red-400/10 hover:bg-red-400/20 rounded transition-colors"

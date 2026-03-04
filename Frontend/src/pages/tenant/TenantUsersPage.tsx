@@ -25,8 +25,8 @@ export default function TenantUsersPage() {
     // Modal States
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newEmail, setNewEmail] = useState("");
-    const [newPassword, setNewPassword] = useState("");
     const [newRole, setNewRole] = useState("MANAGER");
+    const [generatedInviteLink, setGeneratedInviteLink] = useState<string | null>(null);
 
     const fetchUsers = async () => {
         setLoading(true);
@@ -49,23 +49,24 @@ export default function TenantUsersPage() {
         fetchUsers();
     }, []);
 
-    const handleCreateUser = async (e: React.FormEvent) => {
+    const handleCreateInvite = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             const isCustom = customRoles.some(r => r._id === newRole);
             const payload = isCustom
-                ? { email: newEmail, password: newPassword, customRoleId: newRole }
-                : { email: newEmail, password: newPassword, role: newRole };
+                ? { email: newEmail, roleId: newRole }
+                : { email: newEmail, staticRole: newRole };
 
-            await apiClient.post('/users', payload);
-            setIsCreateModalOpen(false);
+            const res = await apiClient.post('/invites', payload);
+            setGeneratedInviteLink(res.data.data.mockEmailLink);
+
+            // We don't close the modal immediately so the Admin can copy the link
             setNewEmail("");
-            setNewPassword("");
             setNewRole("MANAGER");
             fetchUsers();
         } catch (err: any) {
             console.error(err.response?.data || err);
-            alert(err.response?.data?.message || err.message || "Failed to create user.");
+            alert(err.response?.data?.message || err.message || "Failed to generate invite.");
         }
     };
 
@@ -102,10 +103,13 @@ export default function TenantUsersPage() {
                 </div>
                 {currentUserRole === 'TENANT_ADMIN' && (
                     <button
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded font-medium transition-colors"
+                        onClick={() => {
+                            setIsCreateModalOpen(true);
+                            setGeneratedInviteLink(null);
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded font-medium transition-colors border border-emerald-500/50"
                     >
-                        + Access Grant
+                        + Invite User
                     </button>
                 )}
             </div>
@@ -171,69 +175,89 @@ export default function TenantUsersPage() {
                 </div>
             )}
 
-            {/* CREATE MODAL */}
+            {/* INVITE MODAL */}
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
                     <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl w-full max-w-md shadow-2xl">
-                        <h2 className="text-xl font-bold text-white mb-4">Grant Environment Access</h2>
-                        <form onSubmit={handleCreateUser} className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-zinc-400 mb-1">Collaborator Email</label>
-                                <input
-                                    type="email"
-                                    required
-                                    value={newEmail}
-                                    onChange={e => setNewEmail(e.target.value)}
-                                    className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"
-                                />
+                        <h2 className="text-xl font-bold text-white mb-2">Secure Invitation Portal</h2>
+
+                        {generatedInviteLink ? (
+                            <div className="space-y-4 mb-4">
+                                <div className="bg-green-950/30 border border-green-500/50 p-4 rounded text-center">
+                                    <div className="text-green-400 font-semibold mb-2">Cryptographic Token Generated</div>
+                                    <p className="text-sm text-zinc-400 mb-4">
+                                        Distribute this exact secure onboarding vector to the collaborator. It will expire securely in 48 hours.
+                                    </p>
+                                    <div className="bg-black border border-zinc-700 p-3 flex items-center relative overflow-hidden text-xs font-mono text-cyan-300 break-all rounded">
+                                        {generatedInviteLink}
+                                    </div>
+                                </div>
+                                <div className="pt-2 flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsCreateModalOpen(false);
+                                            setGeneratedInviteLink(null);
+                                        }}
+                                        className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded text-sm transition-colors border border-zinc-700"
+                                    >
+                                        Close Portal
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm text-zinc-400 mb-1">Initial Password</label>
-                                <input
-                                    type="password"
-                                    required
-                                    value={newPassword}
-                                    onChange={e => setNewPassword(e.target.value)}
-                                    className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm text-zinc-400 mb-1">Execution Authority Bounds</label>
-                                <select
-                                    value={newRole}
-                                    onChange={e => setNewRole(e.target.value)}
-                                    className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-emerald-400 focus:border-emerald-500 focus:outline-none"
-                                >
-                                    <optgroup label="Static Roles (Native)">
-                                        <option value="TENANT_ADMIN">Tenant Administrator (Full Capabilities)</option>
-                                        <option value="MANAGER">Operational Manager (Deployments & Config)</option>
-                                        <option value="TENANT">Standard Operator (Read Only Execution View)</option>
-                                    </optgroup>
-                                    {customRoles.length > 0 && (
-                                        <optgroup label="Dynamic Boundaries (Custom)">
-                                            {customRoles.map(cr => (
-                                                <option key={cr._id} value={cr._id}>{cr.name}</option>
-                                            ))}
+                        ) : (
+                            <form onSubmit={handleCreateInvite} className="space-y-4">
+                                <p className="text-zinc-500 text-sm mb-4">Admins no longer provision passwords. Generate a secure, single-use token to invite collaborators.</p>
+
+                                <div>
+                                    <label className="block text-sm text-zinc-400 mb-1">Collaborator Email</label>
+                                    <input
+                                        type="email"
+                                        required
+                                        value={newEmail}
+                                        onChange={e => setNewEmail(e.target.value)}
+                                        className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm text-zinc-400 mb-1">Execution Authority Bounds</label>
+                                    <select
+                                        value={newRole}
+                                        onChange={e => setNewRole(e.target.value)}
+                                        className="w-full bg-black border border-zinc-700 rounded px-3 py-2 text-emerald-400 focus:border-emerald-500 focus:outline-none"
+                                    >
+                                        <optgroup label="Static Roles (Native)">
+                                            <option value="TENANT_ADMIN">Tenant Administrator (Full Capabilities)</option>
+                                            <option value="MANAGER">Operational Manager (Deployments & Config)</option>
+                                            <option value="TENANT">Standard Operator (Read Only Execution View)</option>
                                         </optgroup>
-                                    )}
-                                </select>
-                            </div>
-                            <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2 text-sm text-zinc-400 hover:text-white"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-sm transition-colors"
-                                >
-                                    Generate Access Token
-                                </button>
-                            </div>
-                        </form>
+                                        {customRoles.length > 0 && (
+                                            <optgroup label="Dynamic Boundaries (Custom)">
+                                                {customRoles.map(cr => (
+                                                    <option key={cr._id} value={cr._id}>{cr.name}</option>
+                                                ))}
+                                            </optgroup>
+                                        )}
+                                    </select>
+                                </div>
+                                <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsCreateModalOpen(false)}
+                                        className="px-4 py-2 text-sm text-zinc-400 hover:text-white border border-transparent"
+                                    >
+                                        Abort
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-sm transition-colors border border-emerald-500/50"
+                                    >
+                                        Generate Secure Invite
+                                    </button>
+                                </div>
+                            </form>
+                        )}
                     </div>
                 </div>
             )}

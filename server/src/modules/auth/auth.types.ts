@@ -7,6 +7,9 @@ import { Role } from "../../constants/roles";
 export interface JwtPayload {
   userId: string;
   role: Role;
-  tenantId?: string; // 🔑 ADD THIS
+  tenantId?: string;
+  impersonating?: boolean;
+  impersonatedTenantId?: string;
+  impersonatedRole?: Role;
 }
 

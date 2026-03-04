@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Permission } from "../../constants/permissions";
 import { requirePermission } from "../../middleware/requirePermission";
 import authMiddleware from "../../middleware/auth.middleware";
+import { withAudit } from "../audit/audit.middleware";
 import {
   listPolicies,
   getPolicyById,
@@ -26,6 +27,7 @@ router.use(authMiddleware);
 router.post(
   "/",
   requirePermission(Permission.POLICY_WRITE),
+  withAudit("Create Policy", (req) => ({ type: "POLICY", id: req.body?.policyId || "UNKNOWN" })),
   createPolicy
 );
 
@@ -35,6 +37,7 @@ router.post(
 router.post(
   "/:id/draft",
   requirePermission(Permission.POLICY_WRITE),
+  withAudit("Create Policy Version", (req) => ({ type: "VERSION", id: req.params.id as string })),
   createDraft
 );
 
@@ -53,6 +56,7 @@ router.post(
 router.post(
   "/:id/rollback/:version",
   requirePermission(Permission.POLICY_ADMIN),
+  withAudit("Rollback Policy Version", (req) => ({ type: "POLICY", id: req.params.id as string, meta: { version: req.params.version as string } })),
   rollback
 );
 

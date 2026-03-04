@@ -5,4 +5,7 @@ export interface RequestUser {
   id: string;
   role: Role;
   tenantId?: string;
+  impersonating?: boolean;
+  impersonatedTenantId?: string;
+  impersonatedRole?: Role;
 }

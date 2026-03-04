@@ -3,6 +3,7 @@ import type { PolicyVersion } from "../types";
 import type { UnifiedSimulationResult } from "../../simulation/types";
 import { StatusBadge } from "./StatusBadge";
 import { Play, CheckCircle, RotateCcw } from "lucide-react";
+import { PolicyEditorModal } from "./PolicyEditorModal";
 import {
     useSimulatePolicy,
     useApprovePolicy,
@@ -26,13 +27,18 @@ export const VersionTable: React.FC<VersionTableProps> = ({
     const executeMutation = useExecutePolicy(policyId);
     const rollbackMutation = useRollbackPolicy(policyId);
 
-    const handleSimulate = (version: number) => {
-        simulateMutation.mutate({
-            policyId,
-            version,
-            change: { action: "modify", resource: "Demo", attributes: {} },
-        }, {
+    const [editorOpen, setEditorOpen] = React.useState(false);
+    const [activeVersion, setActiveVersion] = React.useState<number | null>(null);
+
+    const handleOpenSimulate = (version: number) => {
+        setActiveVersion(version);
+        setEditorOpen(true);
+    };
+
+    const handleSubmitSimulation = (payload: any) => {
+        simulateMutation.mutate(payload, {
             onSuccess: (data: any) => {
+                setEditorOpen(false);
                 if (onSimulationSuccess) onSimulationSuccess(data);
             }
         });
@@ -43,7 +49,7 @@ export const VersionTable: React.FC<VersionTableProps> = ({
             case "draft":
                 return (
                     <button
-                        onClick={() => handleSimulate(version.version)}
+                        onClick={() => handleOpenSimulate(version.version)}
                         disabled={simulateMutation.isPending}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none disabled:opacity-50"
                     >
@@ -145,6 +151,17 @@ export const VersionTable: React.FC<VersionTableProps> = ({
                     ))}
                 </tbody>
             </table>
+
+            {activeVersion !== null && (
+                <PolicyEditorModal
+                    isOpen={editorOpen}
+                    onClose={() => setEditorOpen(false)}
+                    policyId={policyId}
+                    version={activeVersion}
+                    onSubmit={handleSubmitSimulation}
+                    isLoading={simulateMutation.isPending}
+                />
+            )}
         </div>
     );
 };

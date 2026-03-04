@@ -5,6 +5,7 @@ export type ReleaseStatus =
   | "DRAFT"
   | "ACTIVE"
   | "PAUSED"
+  | "FAILED"
   | "COMPLETED"
   | "ROLLED_BACK";
 
@@ -48,7 +49,7 @@ const PolicyReleaseSchema = new Schema<PolicyReleaseDocument>(
 
     status: {
       type: String,
-      enum: ["DRAFT", "ACTIVE", "PAUSED", "COMPLETED", "ROLLED_BACK"],
+      enum: ["DRAFT", "ACTIVE", "PAUSED", "FAILED", "COMPLETED", "ROLLED_BACK"],
       required: true,
     },
 

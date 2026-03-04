@@ -3,6 +3,7 @@ import { getUsers, createUser, updateUserRole, deleteUser } from './user.control
 import { requirePermission } from '../../middleware/requirePermission';
 import authMiddleware from '../../middleware/auth.middleware';
 import { Permission } from '../../constants/permissions';
+import { withAudit } from '../audit/audit.middleware';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.use(authMiddleware);
 router.use(requirePermission(Permission.USER_MANAGE));
 
 router.get('/', getUsers);
-router.post('/', createUser);
+router.post('/', withAudit("Create User", (req) => ({ type: "USER", id: req.body?.email || "UNKNOWN" })), createUser);
 router.patch('/:id/role', updateUserRole);
 router.delete('/:id', deleteUser);
 

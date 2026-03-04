@@ -97,10 +97,33 @@ export const getTenantById = async (req: Request, res: Response) => {
  * GET ALL TENANTS (SUPER_ADMIN ONLY)
  */
 export const getAllTenants = async (req: Request, res: Response) => {
-  const tenants = await Tenant.find({}, '_id name createdAt').lean();
+  const tenants = await Tenant.find({}, '_id name email phone status createdAt').lean();
   res.json({
     success: true,
     data: tenants
   });
 };
 
+/**
+ * TOGGLE TENANT STATUS (SUPER_ADMIN ONLY)
+ */
+export const toggleTenantStatus = async (req: Request, res: Response) => {
+  const tenant = await Tenant.findById(req.params.id);
+
+  if (!tenant) {
+    return res.status(404).json({ message: 'Tenant not found' });
+  }
+
+  tenant.status = tenant.status === 'SUSPENDED' ? 'ACTIVE' : 'SUSPENDED';
+  await tenant.save();
+
+  await logAudit({
+    req,
+    action: "UPDATE_TENANT",
+    resource: "TENANT",
+    resourceId: tenant.id,
+    outcome: "ALLOW",
+  });
+
+  res.json({ success: true, tenant });
+};

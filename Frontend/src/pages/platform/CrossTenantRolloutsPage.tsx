@@ -196,10 +196,15 @@ export default function CrossTenantRolloutsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right space-x-2">
-                                            {release.status === "ACTIVE" && release.rolloutPercentage < 100 && (
+                                            {release.rolloutPercentage < 100 && (
                                                 <button
-                                                    onClick={() => handlePromote(release)}
-                                                    className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 rounded transition-colors"
+                                                    onClick={() => release.status === "ACTIVE" ? handlePromote(release) : undefined}
+                                                    disabled={release.status !== "ACTIVE"}
+                                                    className={`px-2 py-1 text-xs font-medium rounded transition-colors ${release.status === "ACTIVE"
+                                                            ? "text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20"
+                                                            : "text-zinc-500 bg-zinc-800 cursor-not-allowed"
+                                                        }`}
+                                                    title={release.status !== "ACTIVE" ? "Rollout is not in a safe active state to promote." : "Expand Rollout"}
                                                 >
                                                     Promote
                                                 </button>

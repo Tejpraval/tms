@@ -7,6 +7,7 @@ import PlatformOverviewPage from "@/pages/platform-overview/PlatformOverviewPage
 import TenantDrilldownPage from "@/pages/platform/TenantDrilldownPage";
 import TenantRegistryPage from "@/pages/platform/TenantRegistryPage";
 import SystemAuditPage from "@/pages/platform/SystemAuditPage";
+import GlobalAuditPage from "@/pages/platform/GlobalAuditPage";
 import CrossTenantRolloutsPage from "@/pages/platform/CrossTenantRolloutsPage";
 import TenantDashboardPage from "@/pages/tenant/TenantDashboardPage";
 import { PolicyManagementPage } from "@/pages/tenant/PolicyManagementPage";
@@ -16,12 +17,17 @@ import TenantRolesPage from "@/pages/tenant/TenantRolesPage";
 import TenantUsersPage from "@/pages/tenant/TenantUsersPage";
 import { ComparisonPage } from "@/modules/version-comparison/pages/ComparisonPage";
 import LoginPage from "@/pages/auth/LoginPage";
+import AcceptInvitePage from "@/pages/auth/AcceptInvitePage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
+  },
+  {
+    path: "/accept-invite",
+    element: <AcceptInvitePage />,
   },
   {
     path: "/",
@@ -68,6 +74,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <SystemAuditPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "global-audit",
+        element: (
+          <ProtectedRoute>
+            <GlobalAuditPage />
           </ProtectedRoute>
         ),
       },

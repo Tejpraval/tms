@@ -9,6 +9,7 @@ import { executePolicy } from "./execution.controller";
 import { listPendingApprovals } from "./approval.controller";
 import { requirePermission } from "../../middleware/requirePermission";
 import { Permission } from "../../constants/permissions";
+import { withAudit } from "../audit/audit.middleware";
 
 const router = Router();
 
@@ -18,12 +19,14 @@ router.use(authMiddleware);
 router.post(
   "/approve",
   requirePermission(Permission.POLICY_APPROVE),
+  withAudit("Approve Policy Simulation", (req) => ({ type: "APPROVAL", id: req.body?.simulationId || req.body?.policyId || "UNKNOWN" })),
   approveSimulation as RequestHandler
 );
 
 router.post(
   "/reject",
   requirePermission(Permission.POLICY_APPROVE),
+  withAudit("Reject Policy Simulation", (req) => ({ type: "APPROVAL", id: req.body?.simulationId || req.body?.policyId || "UNKNOWN" })),
   rejectSimulation as RequestHandler
 );
 

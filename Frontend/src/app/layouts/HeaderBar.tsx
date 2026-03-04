@@ -3,6 +3,8 @@ import { CommandPalette } from "./CommandPalette";
 import { RoleBadge } from "@/components/ui/RoleBadge";
 import { TenantContextIndicator } from "@/components/ui/TenantContextIndicator";
 import { useAuth } from "@/context/AuthContext";
+import { apiClient } from "@/lib/axios";
+import { AlertTriangle, LogOut } from "lucide-react";
 
 const environments = ["DEV", "STAGING", "PROD"] as const;
 type Environment = (typeof environments)[number];
@@ -10,7 +12,21 @@ type Environment = (typeof environments)[number];
 export const HeaderBar = () => {
     const [env, setEnv] = useState<Environment>("DEV");
     const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-    const { role, logout } = useAuth();
+    const { role, tenantName, customRoleName, login, logout, impersonating } = useAuth();
+    const [exiting, setExiting] = useState(false);
+
+    const handleExitImpersonation = async () => {
+        setExiting(true);
+        try {
+            const res = await apiClient.post("/auth/impersonate/exit");
+            await login({ accessToken: res.data.accessToken });
+        } catch (err: any) {
+            console.error("Failed to exit impersonation", err);
+            alert("Failed to exit impersonation state. Please log out and back in.");
+        } finally {
+            setExiting(false);
+        }
+    };
 
     // Keyboard Shortcut
     useEffect(() => {
@@ -31,8 +47,24 @@ export const HeaderBar = () => {
     }, []);
 
     return (
-        <>
-            <header className="h-16 bg-zinc-950 border-b border-zinc-800 px-6 flex items-center justify-between shrink-0">
+        <div className="flex flex-col shrink-0">
+            {impersonating && (
+                <div className="bg-orange-500/20 border-b border-orange-500/50 py-1.5 px-6 flex items-center justify-center gap-4 animate-pulse-slow">
+                    <AlertTriangle className="w-4 h-4 text-orange-400" />
+                    <span className="text-orange-200 text-sm font-medium">
+                        SUPER ADMIN WARNING: You are currently impersonating <strong className="text-white">{tenantName || "Unknown Tenant"}</strong> as a <strong className="text-white">Tenant Admin</strong>.
+                    </span>
+                    <button
+                        onClick={handleExitImpersonation}
+                        disabled={exiting}
+                        className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded text-xs font-bold transition-colors shadow-lg"
+                    >
+                        <LogOut className="w-3 h-3" />
+                        {exiting ? "Exiting..." : "Exit Impersonation"}
+                    </button>
+                </div>
+            )}
+            <header className="h-16 bg-zinc-950 border-b border-zinc-800 px-6 flex items-center justify-between">
                 {/* Left: Search & Context */}
                 <div className="flex items-center gap-4">
                     <button
@@ -69,9 +101,9 @@ export const HeaderBar = () => {
                                 PLATFORM MODE
                             </span>
                         ) : (
-                            <TenantContextIndicator tenantName="Acme Corp" />
+                            <TenantContextIndicator tenantName={tenantName || "Unknown Tenant"} />
                         )}
-                        <RoleBadge role={role === "SUPER_ADMIN" ? "Super Admin" : "Tenant Admin"} />
+                        <RoleBadge role={customRoleName || (role === "SUPER_ADMIN" ? "Super Admin" : role === "TENANT_ADMIN" ? "Tenant Admin" : role === "MANAGER" ? "Manager" : "Tenant Member")} />
 
                         <button
                             onClick={logout}
@@ -87,6 +119,6 @@ export const HeaderBar = () => {
                 isOpen={isPaletteOpen}
                 onClose={() => setIsPaletteOpen(false)}
             />
-        </>
+        </div>
     );
 };

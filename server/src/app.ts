@@ -12,6 +12,7 @@ import approvalRoutes from "./modules/policy-approval/approval.routes";
 import executionRoutes from "./modules/policy-approval/execution.routes";
 import userRoutes from "./modules/user/user.routes";
 import roleRoutes from "./modules/role/role.routes";
+import inviteRoutes from "./modules/user-invite/invite.routes";
 
 import policyVersionRoutes from "./modules/policy-versioning/policyVersion.routes";
 import policyReleaseRoutes from "./modules/policy-versioning/policyRelease.routes";
@@ -73,6 +74,9 @@ app.use("/api/users", userRoutes);
 
 // Roles
 app.use("/api/roles", roleRoutes);
+
+// Invites
+app.use("/api/invites", inviteRoutes);
 
 // Tenant
 app.use("/api/tenant", tenantRoutes);

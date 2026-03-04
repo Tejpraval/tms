@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
-import { TenantContextIndicator } from "@/components/ui/TenantContextIndicator";
 import { TenantOverviewGrid } from "@/modules/super-admin-dashboard/components/TenantOverviewGrid";
 import { SkeletonTable } from "@/components/ui/Skeleton";
+import { TenantRiskMatrix } from "@/modules/platform/components/TenantRiskMatrix";
 
 export default function PlatformOverviewPage() {
     const { data, isLoading } = useQuery({
@@ -36,6 +35,10 @@ export default function PlatformOverviewPage() {
 
             <div className="grid grid-cols-1 gap-6 mb-8">
                 <TenantOverviewGrid />
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 mb-8">
+                <TenantRiskMatrix />
             </div>
 
             {/* Placeholder for future system audits or logs */}

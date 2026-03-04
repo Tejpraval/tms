@@ -1,0 +1,4 @@
+﻿src/modules/audit/audit.model.ts(41,12): error TS2349: This expression is not callable.
+  Type 'SaveOptions' has no call signatures.
+src/modules/audit/audit.model.ts(43,3): error TS2349: This expression is not callable.
+  Type 'SaveOptions' has no call signatures.

@@ -9,6 +9,7 @@ interface JwtPayload {
     userId: string;
     role: Role;
     tenantId?: string;
+    impersonating?: boolean;
     exp: number;
 }
 
@@ -16,8 +17,11 @@ interface AuthContextType {
     accessToken: string | null;
     role: Role | null;
     tenantId: string | null;
+    tenantName: string | null;
+    customRoleName: string | null;
     permissions: string[] | null;
     isAuthenticated: boolean;
+    impersonating: boolean;
     login: (data: { accessToken?: string }) => Promise<void>;
     logout: () => void;
     loading: boolean;
@@ -29,7 +33,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [accessToken, setAccessToken] = useState<string | null>(null);
     const [role, setRole] = useState<Role | null>(null);
     const [tenantId, setTenantId] = useState<string | null>(null);
+    const [tenantName, setTenantName] = useState<string | null>(null);
+    const [customRoleName, setCustomRoleName] = useState<string | null>(null);
     const [permissions, setPermissions] = useState<string[] | null>(null);
+    const [impersonating, setImpersonating] = useState<boolean>(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -49,14 +56,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                     console.log("Effective permissions:", res.data.permissions || []);
 
+                    const effectiveRole = decoded.impersonating && decoded.impersonatedRole ? decoded.impersonatedRole : decoded.role;
+                    const effectiveTenantId = decoded.impersonating && decoded.impersonatedTenantId ? decoded.impersonatedTenantId : (decoded.tenantId || null);
+
                     setAccessToken(token);
-                    setRole(decoded.role);
-                    setTenantId(decoded.tenantId || null);
+                    setRole(effectiveRole);
+                    setTenantId(effectiveTenantId);
+                    setTenantName(res.data.tenantName || null);
+                    setCustomRoleName(res.data.customRoleName || null);
                     setPermissions(res.data.permissions || []);
+                    setImpersonating(!!decoded.impersonating);
                 } catch (error) {
                     console.error('Invalid token or failed fetching permissions during initialization', error);
                     localStorage.removeItem('accessToken');
                     setPermissions(null);
+                    setTenantName(null);
+                    setCustomRoleName(null);
+                    setImpersonating(false);
                 }
             }
             setLoading(false);
@@ -80,11 +96,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             console.log("Effective permissions:", res.data.permissions || []);
 
+            const effectiveRole = decoded.impersonating && decoded.impersonatedRole ? decoded.impersonatedRole : decoded.role;
+            const effectiveTenantId = decoded.impersonating && decoded.impersonatedTenantId ? decoded.impersonatedTenantId : (decoded.tenantId || null);
+
             localStorage.setItem('accessToken', token);
             setAccessToken(token);
-            setRole(decoded.role);
-            setTenantId(decoded.tenantId || null);
+            setRole(effectiveRole);
+            setTenantId(effectiveTenantId);
+            setTenantName(res.data.tenantName || null);
+            setCustomRoleName(res.data.customRoleName || null);
             setPermissions(res.data.permissions || []);
+            setImpersonating(!!decoded.impersonating);
         } catch (error) {
             console.error('Failed to decode token or fetch permissions on login', error);
             throw error; // propagate to LoginPage
@@ -96,11 +118,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setAccessToken(null);
         setRole(null);
         setTenantId(null);
+        setTenantName(null);
+        setCustomRoleName(null);
         setPermissions(null);
+        setImpersonating(false);
     };
 
     return (
-        <AuthContext.Provider value={{ accessToken, role, tenantId, permissions, isAuthenticated: !!accessToken, login, logout, loading }}>
+        <AuthContext.Provider value={{ accessToken, role, tenantId, tenantName, customRoleName, permissions, isAuthenticated: !!accessToken, impersonating, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

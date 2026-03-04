@@ -29,6 +29,9 @@ export default function TenantRolesPage() {
     const [newRoleName, setNewRoleName] = useState("");
     const [newRolePermissions, setNewRolePermissions] = useState<string[]>([]);
 
+    // New state for inline validation errors returned from the Backend Role Validation Engine
+    const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
     const fetchRoles = async () => {
         setLoading(true);
         setError(null);
@@ -54,6 +57,7 @@ export default function TenantRolesPage() {
 
     const handleCreateRole = async (e: React.FormEvent) => {
         e.preventDefault();
+        setValidationErrors([]);
         try {
             await apiClient.post('/roles', {
                 name: newRoleName,
@@ -64,13 +68,19 @@ export default function TenantRolesPage() {
             setNewRolePermissions([]);
             fetchRoles();
         } catch (err: any) {
-            alert(err.response?.data?.message || err.message || "Failed to create role.");
+            // Check for explicit structured validation errors from the Role Validation Engine
+            if (err.response?.status === 400 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+            } else {
+                alert(err.response?.data?.message || err.message || "Failed to create role.");
+            }
         }
     };
 
     const handleEditRole = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingRole) return;
+        setValidationErrors([]);
         try {
             await apiClient.patch(`/roles/${editingRole._id}/permissions`, {
                 permissions: newRolePermissions
@@ -80,7 +90,11 @@ export default function TenantRolesPage() {
             setNewRolePermissions([]);
             fetchRoles();
         } catch (err: any) {
-            alert(err.response?.data?.message || err.message || "Failed to update role permissions.");
+            if (err.response?.status === 400 && err.response?.data?.errors) {
+                setValidationErrors(err.response.data.errors);
+            } else {
+                alert(err.response?.data?.message || err.message || "Failed to update role permissions.");
+            }
         }
     };
 
@@ -88,6 +102,7 @@ export default function TenantRolesPage() {
         setEditingRole(role);
         setNewRoleName(role.name); // Just for display (unchangeable backendly via patch)
         setNewRolePermissions(role.permissions);
+        setValidationErrors([]);
         setIsEditModalOpen(true);
     };
 
@@ -220,10 +235,29 @@ export default function TenantRolesPage() {
                                 ))}
                             </div>
 
+                            {validationErrors.length > 0 && (
+                                <div className="bg-red-950/40 border border-red-900/50 rounded-lg p-4 space-y-2">
+                                    <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        Structural Validation Failed
+                                    </div>
+                                    <ul className="text-red-300/80 text-xs list-disc pl-5 space-y-1">
+                                        {validationErrors.map((err, i) => (
+                                            <li key={i}>{err}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
                             <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
                                 <button
                                     type="button"
-                                    onClick={() => setIsCreateModalOpen(false)}
+                                    onClick={() => {
+                                        setIsCreateModalOpen(false);
+                                        setValidationErrors([]);
+                                    }}
                                     className="px-4 py-2 text-sm text-zinc-400 hover:text-white"
                                 >
                                     Cancel
@@ -273,10 +307,30 @@ export default function TenantRolesPage() {
                                 ))}
                             </div>
 
+                            {validationErrors.length > 0 && (
+                                <div className="bg-red-950/40 border border-red-900/50 rounded-lg p-4 space-y-2">
+                                    <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                        </svg>
+                                        Structural Validation Failed
+                                    </div>
+                                    <ul className="text-red-300/80 text-xs list-disc pl-5 space-y-1">
+                                        {validationErrors.map((err, i) => (
+                                            <li key={i}>{err}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
                             <div className="pt-4 flex justify-end gap-3 border-t border-zinc-800">
                                 <button
                                     type="button"
-                                    onClick={() => { setIsEditModalOpen(false); setEditingRole(null); }}
+                                    onClick={() => {
+                                        setIsEditModalOpen(false);
+                                        setEditingRole(null);
+                                        setValidationErrors([]);
+                                    }}
                                     className="px-4 py-2 text-sm text-zinc-400 hover:text-white"
                                 >
                                     Cancel

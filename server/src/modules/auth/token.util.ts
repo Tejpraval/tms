@@ -12,9 +12,20 @@ const refreshTokenOptions: SignOptions = {
 };
 
 export function signAccessToken(payload: JwtPayload) {
-  return jwt.sign(payload, ENV.JWT_ACCESS_SECRET, {
-    expiresIn: "15m",
-  });
+  return jwt.sign(
+    {
+      userId: payload.userId,
+      role: payload.role,
+      tenantId: payload.tenantId,
+      impersonating: payload.impersonating,
+      impersonatedTenantId: payload.impersonatedTenantId,
+      impersonatedRole: payload.impersonatedRole
+    },
+    ENV.JWT_ACCESS_SECRET,
+    {
+      expiresIn: "15m",
+    }
+  );
 }
 
 export function signRefreshToken(

@@ -20,7 +20,7 @@ export const SidebarNavigation = () => {
             { label: "Role Boundaries", href: "/roles" },
             { label: "User Accounts", href: "/users" }
         ] : []),
-        ...((hasPermission("TENANT_READ") || role === "SUPER_ADMIN") ? [{ label: "Audit Logs", href: role === "SUPER_ADMIN" ? "/system-audit" : "/tenant-audit" }] : []),
+        ...((hasPermission("TENANT_READ") || role === "SUPER_ADMIN") ? [{ label: "Audit Logs", href: role === "SUPER_ADMIN" ? "/global-audit" : "/tenant-audit" }] : []),
     ];
 
     return (

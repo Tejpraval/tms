@@ -91,6 +91,32 @@ export const PolicyManagementPage: React.FC = () => {
                                             Compare Versions
                                         </button>
                                         <button
+                                            onClick={async () => {
+                                                try {
+                                                    const candidate = versions?.find((v: any) => v.status === 'draft' || v.status === 'active');
+                                                    if (!candidate) return alert("Must have at least one draft or active version to rollout.");
+
+                                                    // Use apiClient to ensure the Authorization Header is sent
+                                                    const { apiClient } = await import('../../lib/axios');
+                                                    await apiClient.post('/policy-release', {
+                                                        tenantId: activePolicy?.tenantId || 'demo-tenant',
+                                                        policyId: activePolicy?._id,
+                                                        baseVersionId: candidate._id,
+                                                        candidateVersionId: candidate._id,
+                                                        rolloutPercentage: 10
+                                                    });
+
+                                                    alert("✅ Quick Rollout Initiated! Go to the Rollouts page to view it.");
+                                                } catch (err: any) {
+                                                    console.error(err);
+                                                    alert(`Failed to start rollout: ${err.response?.data?.message || err.message}`);
+                                                }
+                                            }}
+                                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none transition-colors"
+                                        >
+                                            Deploy Rollout
+                                        </button>
+                                        <button
                                             onClick={handleCreateDraft}
                                             disabled={createDraftMutation.isPending}
                                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50 transition-colors"

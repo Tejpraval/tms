@@ -106,7 +106,8 @@ export const rollbackReleaseHandler: RequestHandler =
 export const listActiveReleases: RequestHandler =
   async (req, res, next) => {
     try {
-      const query: any = { status: "ACTIVE" };
+      // Changed to include FAILED rollouts so the UI can display them as locked
+      const query: any = { status: { $in: ["ACTIVE", "FAILED", "PAUSED"] } };
       if (req.user?.role !== "SUPER_ADMIN" && req.user?.tenantId) {
         query.tenantId = req.user.tenantId;
       }
