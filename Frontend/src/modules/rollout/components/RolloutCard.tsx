@@ -15,18 +15,17 @@ const statusColor: Record<string, string> = {
 export const RolloutCard = ({ release }: Props) => {
   return (
     <div className="bg-zinc-900 rounded-2xl p-5 space-y-4 border border-zinc-800">
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-sm text-zinc-400">Policy</p>
-          <h3 className="text-lg font-semibold">
+      <div className="flex justify-between items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-zinc-400">Policy ID</p>
+          <h3 className="text-lg font-semibold truncate" title={release.policyId}>
             {release.policyId}
           </h3>
         </div>
 
         <span
-          className={`text-sm font-semibold ${
-            statusColor[release.status] ?? "text-zinc-400"
-          }`}
+          className={`text-sm font-semibold flex-shrink-0 ${statusColor[release.status] ?? "text-zinc-400"
+            }`}
         >
           {release.status}
         </span>

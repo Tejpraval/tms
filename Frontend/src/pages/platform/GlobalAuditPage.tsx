@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { apiClient } from "@/lib/axios";
 import { SkeletonTable } from "@/components/ui/Skeleton";
 
@@ -32,9 +32,9 @@ export default function GlobalAuditPage() {
             const res = await apiClient.get<PaginatedAuditResponse>(`/audit/global?page=${page}&limit=${limit}`);
             return res.data;
         },
-        keepPreviousData: true,
+        placeholderData: keepPreviousData,
         staleTime: 10000,
-    } as any);
+    });
 
     if (isLoading && !data) {
         return (

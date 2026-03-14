@@ -211,7 +211,14 @@ import { AuthenticatedRequest } from "../../types/authenticated-request";
 
 export const listPolicies = async (req: Request, res: Response) => {
   const userReq = req as AuthenticatedRequest;
+
+  console.log("\n==== LIST POLICIES REQUEST ====");
+  console.log("Req.User:", userReq.user);
+  console.log("Querying for TenantId:", userReq.user?.tenantId);
+
   const policies = await Policy.find({ tenantId: userReq.user?.tenantId }).lean();
+
+  console.log(`Found ${policies.length} policies for tenant ${userReq.user?.tenantId}`);
 
   res.json({
     success: true,

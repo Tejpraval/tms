@@ -1,0 +1,15 @@
+{
+  "stack": "MongoServerError: E11000 duplicate key error collection: tenant-db.roles index: name_1_tenantId_1 dup key: { name: \"Senior Architect\", tenantId: ObjectId('698734c63a3d553bff3e516b') }\n    at InsertOneOperation.handleOk (D:\\resumeproject\\server\\node_modules\\mongodb\\src\\operations\\insert.ts:79:13)\n    at tryOperation (D:\\resumeproject\\server\\node_modules\\mongodb\\src\\operations\\execute_operation.ts:294:26)\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at executeOperation (D:\\resumeproject\\server\\node_modules\\mongodb\\src\\operations\\execute_operation.ts:123:12)\n    at Collection.insertOne (D:\\resumeproject\\server\\node_modules\\mongodb\\src\\collection.ts:294:12)\n    at model.$__save (D:\\resumeproject\\server\\node_modules\\mongoose\\lib\\model.js:405:16)\n    at model.save (D:\\resumeproject\\server\\node_modules\\mongoose\\lib\\model.js:642:5)\n    at D:\\resumeproject\\server\\node_modules\\mongoose\\lib\\model.js:2778:9\n    at async Promise.all (index 0)\n    at Function.create (D:\\resumeproject\\server\\node_modules\\mongoose\\lib\\model.js:2763:11)",
+  "message": "E11000 duplicate key error collection: tenant-db.roles index: name_1_tenantId_1 dup key: { name: \"Senior Architect\", tenantId: ObjectId('698734c63a3d553bff3e516b') }",
+  "errorLabelSet": {},
+  "errorResponse": {
+    "index": 0,
+    "code": 11000,
+    "keyPattern": {},
+    "keyValue": {}
+  },
+  "index": 0,
+  "code": 11000,
+  "keyPattern": {},
+  "keyValue": {}
+}

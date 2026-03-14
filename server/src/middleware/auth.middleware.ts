@@ -30,6 +30,10 @@ const authMiddleware: RequestHandler = async (req, res, next) => {
       impersonatedRole: decoded.impersonatedRole
     };
 
+    console.log(`[AUTH MIDDLEWARE] Path: ${req.path}`);
+    console.log(`[AUTH MIDDLEWARE] Decoded ID: ${decoded.userId}, Impersonating: ${decoded.impersonating}, ImpTenantID: ${decoded.impersonatedTenantId}`);
+    console.log(`[AUTH MIDDLEWARE] Constructed User:`, user);
+
     req.user = user; // ✅ correct
 
     // Defer to the active tenant enforcer before advancing

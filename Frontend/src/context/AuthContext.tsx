@@ -1,7 +1,9 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { apiClient } from '@/lib/axios';
+import { queryClient } from '@/lib/queryClient';
 
 export type Role = "SUPER_ADMIN" | "ADMIN" | "MANAGER" | "TENANT_ADMIN" | "TENANT";
 
@@ -10,6 +12,8 @@ interface JwtPayload {
     role: Role;
     tenantId?: string;
     impersonating?: boolean;
+    impersonatedRole?: Role;
+    impersonatedTenantId?: string;
     exp: number;
 }
 
@@ -51,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                     // Fetch permissions utilizing the native Bearer token natively
                     const res = await apiClient.get('/auth/me', {
-                        headers: { Authorization: `Bearer ${token}` }
+                        headers: { Authorization: `Bearer ${token} ` }
                     });
 
                     console.log("Effective permissions:", res.data.permissions || []);
@@ -81,25 +85,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         initializeAuth();
     }, []);
 
-    const login = async (data: { accessToken?: string }) => {
+    const login = useCallback(async (data: { accessToken?: string }) => {
         try {
+            // Aggressively flush the React Server Cache so prior impersonation data doesn't bleed into new screens
+            queryClient.clear();
+
             if (!data || !data.accessToken) {
                 throw new Error("Invalid credentials");
             }
             const token = data.accessToken;
             const decoded = jwtDecode<JwtPayload>(token);
 
+            // Save token globally immediately so the Axios interceptor picks it up naturally
+            localStorage.setItem('accessToken', token);
+
             // Fetch permissions matching login execution strictly
-            const res = await apiClient.get('/auth/me', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await apiClient.get('/auth/me');
 
             console.log("Effective permissions:", res.data.permissions || []);
 
             const effectiveRole = decoded.impersonating && decoded.impersonatedRole ? decoded.impersonatedRole : decoded.role;
             const effectiveTenantId = decoded.impersonating && decoded.impersonatedTenantId ? decoded.impersonatedTenantId : (decoded.tenantId || null);
 
-            localStorage.setItem('accessToken', token);
             setAccessToken(token);
             setRole(effectiveRole);
             setTenantId(effectiveTenantId);
@@ -111,9 +118,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             console.error('Failed to decode token or fetch permissions on login', error);
             throw error; // propagate to LoginPage
         }
-    };
+    }, []);
 
-    const logout = () => {
+    const logout = useCallback(() => {
+        // Flush cache on logout to destroy deep data traces
+        queryClient.clear();
+
         localStorage.removeItem('accessToken');
         setAccessToken(null);
         setRole(null);
@@ -122,7 +132,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setCustomRoleName(null);
         setPermissions(null);
         setImpersonating(false);
-    };
+    }, []);
 
     return (
         <AuthContext.Provider value={{ accessToken, role, tenantId, tenantName, customRoleName, permissions, isAuthenticated: !!accessToken, impersonating, login, logout, loading }}>

@@ -41,7 +41,7 @@ export const router = createBrowserRouter([
         index: true,
         element: (
           <ProtectedRoute requiredPermissions={['TENANT_READ']}>
-            <DashboardPage />
+            <TenantDashboardPage />
           </ProtectedRoute>
         ),
       },
@@ -97,7 +97,7 @@ export const router = createBrowserRouter([
         path: "dashboard",
         element: (
           <ProtectedRoute requiredPermissions={['TENANT_READ']}>
-            <TenantDashboardPage />
+            <DashboardPage />
           </ProtectedRoute>
         ),
       },

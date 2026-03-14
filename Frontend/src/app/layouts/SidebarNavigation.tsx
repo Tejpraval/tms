@@ -9,7 +9,8 @@ export const SidebarNavigation = () => {
 
     // Dynamic Navigation Generation utilizing native custom capabilities.
     const navLinks = [
-        ...(hasPermission("TENANT_READ") ? [{ label: "Dashboard", href: role === "SUPER_ADMIN" ? "/platform-overview" : "/dashboard" }] : []),
+        ...(hasPermission("TENANT_READ") ? [{ label: "Advanced Simulation", href: "/dashboard" }] : []),
+        ...(role === "SUPER_ADMIN" ? [{ label: "Platform Overview", href: "/platform-overview" }] : []),
         ...(role === "SUPER_ADMIN" ? [{ label: "Tenant Registry", href: "/tenant-registry" }] : []),
         ...(role === "SUPER_ADMIN" ? [{ label: "Cross-Tenant Rollouts", href: "/cross-tenant-rollouts" }] : []),
         ...(hasPermission("POLICY_ADMIN") ? [{ label: "Live Rollouts", href: "/rollouts" }] : []),
