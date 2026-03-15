@@ -1,7 +1,7 @@
 import { useDashboardData } from "@/pages/dashboard/useDashboardData";
 import { useGovernanceRisk } from "@/modules/risk/hooks/useGovernanceRisk";
 import { Link } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+
 import { SkeletonCard } from "@/components/ui/Skeleton";
 
 export default function TenantDashboardPage() {

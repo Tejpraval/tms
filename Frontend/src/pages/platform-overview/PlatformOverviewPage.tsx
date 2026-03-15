@@ -5,7 +5,7 @@ import { SkeletonTable } from "@/components/ui/Skeleton";
 import { TenantRiskMatrix } from "@/modules/platform/components/TenantRiskMatrix";
 
 export default function PlatformOverviewPage() {
-    const { data, isLoading } = useQuery({
+    const { isLoading } = useQuery({
         queryKey: ["platform-overview"],
         queryFn: async () => {
             const res = await apiClient.get("/platform/overview");

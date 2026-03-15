@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { apiClient } from "@/lib/axios";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+
 import { SkeletonTable } from "@/components/ui/Skeleton";
 import { API } from "@/config/api.routes";
 

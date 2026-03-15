@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/axios";
 import { API } from "@/config/api.routes";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
+
 import { SkeletonTable } from "@/components/ui/Skeleton";
 
 interface Tenant {

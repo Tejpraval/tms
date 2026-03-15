@@ -1,14 +1,11 @@
 import { usePolicies } from "@/modules/policy-versioning/hooks";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+
 import { SkeletonTable } from "@/components/ui/Skeleton";
 
 export const TenantPoliciesPage = () => {
     const { data: policies, isLoading } = usePolicies();
-    const { role, permissions } = useAuth();
     const navigate = useNavigate();
-
-    const hasPermission = (perm: string) => role === 'SUPER_ADMIN' || (permissions && permissions.includes(perm));
 
     if (isLoading) {
         return (
