@@ -45,8 +45,8 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950">
-            <div className="w-full max-w-md p-8 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl">
+        <div className="min-h-screen flex flex-col md:flex-row items-center justify-center gap-8 bg-zinc-950 p-6">
+            <div className="w-full max-w-md p-8 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl shrink-0">
                 <div className="flex justify-center mb-6">
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
                         Governance Platform
@@ -103,7 +103,7 @@ const LoginPage = () => {
             </div>
 
             {/* Zero-Trust Demo Explanation Panel */}
-            <div className="w-full max-w-md mt-6 p-6 bg-zinc-900/50 border border-blue-900/30 rounded-lg shadow-sm">
+            <div className="w-full max-w-md p-6 bg-zinc-900/50 border border-blue-900/30 rounded-lg shadow-sm shrink-0">
                 <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
                     <h3 className="text-sm font-semibold text-blue-400 uppercase tracking-wider">Secure Enterprise Demo</h3>
@@ -135,13 +135,21 @@ const LoginPage = () => {
                 </button>
 
                 {showSampleToken && (
-                    <div className="mb-4 bg-[#0a110d] border border-green-900/60 p-5 rounded-lg text-center shadow-[inset_0_0_20px_rgba(0,0,0,0.5)]">
-                        <div className="text-emerald-500 font-bold mb-2 tracking-wide">Public Invitation Link Generated</div>
-                        <p className="text-xs text-zinc-400 mb-4 leading-relaxed max-w-xs mx-auto">
-                            This is a sample public onboarding link that anyone can use to join the secure sandbox environment.
+                    <div className="mb-6 bg-black border border-emerald-500/50 p-6 rounded-lg text-left shadow-[0_0_30px_rgba(16,185,129,0.15)] relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="w-2 h-2 bg-emerald-500 animate-ping rounded-full"></div>
+                            <div className="text-emerald-400 font-mono text-sm uppercase tracking-widest font-bold">Public Onboarding Vector Generated</div>
+                        </div>
+                        <p className="text-xs text-emerald-500/70 mb-4 font-mono">
+                            // SECURE_SANDBOX_CONTEXT_ESTABLISHED
+                            <br/>
+                            // AWAITING_OPERATOR_ACCEPTANCE
                         </p>
-                        <div className="bg-black border border-zinc-700 p-3 flex items-center justify-center relative overflow-hidden text-xs font-mono text-blue-500 break-all rounded shadow-md">
-                            https://tms-pi-silk.vercel.app/accept-invite?token=demo1234567890
+                        <div className="bg-[#050f0a] border border-emerald-900/50 p-4 relative overflow-hidden text-xs font-mono break-all rounded shadow-inner">
+                            <span className="text-zinc-500 select-none">{'> '}</span>
+                            <span className="text-emerald-300">https://{window.location.hostname}/accept-invite?token=</span>
+                            <span className="text-cyan-400 font-bold animate-pulse">demo_7f8a9b2c1d3e4f5g6h7j8k9l</span>
                         </div>
                     </div>
                 )}
