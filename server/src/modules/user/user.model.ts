@@ -28,6 +28,6 @@ const UserSchema = new Schema<IUser>({
     type: Schema.Types.ObjectId,
     ref: "Role",
   },
-});
+}, { timestamps: true });
 
 export const User = mongoose.model<IUser>("User", UserSchema);

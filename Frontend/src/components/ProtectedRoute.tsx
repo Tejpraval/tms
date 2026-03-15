@@ -32,15 +32,12 @@ export const ProtectedRoute = ({ children, requiredPermissions }: ProtectedRoute
         const hasAccess = permissions && requiredPermissions.every(p => permissions.includes(p));
 
         if (!hasAccess) {
-            if (location.pathname === '/') {
-                return (
-                    <div className="flex bg-zinc-950 flex-col items-center justify-center h-full space-y-4">
-                        <h2 className="text-xl text-red-400 font-semibold">Unauthorized Access</h2>
-                        <p className="text-zinc-500">You lack the necessary permissions to view this resource.</p>
-                    </div>
-                );
-            }
-            return <Navigate to="/" replace />; // Safely fallback for other paths
+            return (
+                <div className="flex bg-zinc-950 flex-col items-center justify-center min-h-[50vh] space-y-4 p-8">
+                    <h2 className="text-xl text-red-500 font-mono font-bold">Authorization Denied</h2>
+                    <p className="text-zinc-400 text-sm">Your current role does not have the required permissions to view this sector.</p>
+                </div>
+            );
         }
     }
 

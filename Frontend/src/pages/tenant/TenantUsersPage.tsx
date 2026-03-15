@@ -158,7 +158,7 @@ export default function TenantUsersPage() {
                                         </select>
                                     </td>
                                     <td className="px-6 py-4 text-zinc-500 font-mono text-xs">
-                                        {new Date(user.createdAt).toLocaleDateString()}
+                                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
