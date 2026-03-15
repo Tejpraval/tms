@@ -7,18 +7,34 @@ A production-grade SaaS Governance Platform that simulates, evaluates, approves,
 
 A full-stack Governance Control Plane designed to:
 
-Simulate RBAC & ABAC policy changes before activation
-
-Quantify risk impact and blast radius
-
-Enforce structured approval workflows
-
-Execute policies atomically with rollback support
-
-Provide real-time governance visibility
+* Simulate RBAC & ABAC policy changes before activation
+* Quantify risk impact and blast radius
+* Enforce structured approval workflows
+* Execute policies atomically with rollback support
+* Provide real-time governance visibility
 
 This is not a CRUD app.
 It is a lifecycle-driven policy orchestration engine.
+
+---
+
+### 🚀 Live Demo & Portfolio Access
+
+> **Live Application URL:** [https://tms-pi-silk.vercel.app](https://tms-pi-silk.vercel.app)
+
+**Enterprise Security Architecture Notice:**
+Because this platform manages destructive, administrative-level governance data with strict multi-tenant isolation, **public sign-ups are intentionally disabled via a Zero-Trust Invitation Model.**
+
+**How to review this project:**
+To test the full capability of the Control Plane (including Super Admin cross-tenant simulations and Manager approval workflows), **please reach out to me directly:**
+
+* **LinkedIn:** [Tej Praval Pula](https://www.linkedin.com/in/tej-praval-pula/)
+* **Email:** [tejpraval32@gmail.com](mailto:tejpraval32@gmail.com)
+* **GitHub:** [Tejpraval](https://github.com/Tejpraval)
+
+I will use the platform's orchestration engine to provision an isolated sandbox environment and generate a secure, single-use cryptographic invite link specifically for you.
+
+---
 
 🏗 Architecture Overview
 Frontend (React + TypeScript)
