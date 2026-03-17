@@ -122,7 +122,7 @@ const LoginPage = () => {
                     To test the full capability of the Control Plane as a Super Admin or Tenant Operator, please reach out to me. I will provision a secure sandbox environment and generate a single-use onboarding token for you.
                 </p>
 
-                <button 
+                <button
                     onClick={() => setShowSampleToken(!showSampleToken)}
                     className="w-full text-left flex items-center justify-between p-3 rounded bg-zinc-900 border border-zinc-700 hover:border-zinc-500 transition-colors mb-4 group"
                 >
@@ -143,7 +143,7 @@ const LoginPage = () => {
                         </div>
                         <p className="text-xs text-emerald-500/70 mb-4 font-mono">
                             // SECURE_SANDBOX_CONTEXT_ESTABLISHED
-                            <br/>
+                            <br />
                             // AWAITING_OPERATOR_ACCEPTANCE
                         </p>
                         <div className="bg-[#050f0a] border border-emerald-900/50 p-4 relative overflow-hidden text-xs font-mono break-all rounded shadow-inner">
