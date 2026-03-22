@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { usePolicies, usePolicyVersions, useCreateDraft } from "../../modules/policy-management/hooks";
+import { usePolicies, usePolicyVersions } from "../../modules/policy-management/hooks";
 import { VersionTable } from "../../modules/policy-management/components/VersionTable";
 import { SimulationResultPanel } from "../../modules/simulation/components/SimulationResultPanel";
 import type { UnifiedSimulationResult } from "../../modules/simulation/types";
