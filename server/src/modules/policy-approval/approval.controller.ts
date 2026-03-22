@@ -26,11 +26,13 @@ export async function approveSimulation(
   res: Response
 ) {
   try {
-    const { simulationId, policyId, version, comment } = req.body;
+    const { approvalId, simulationId, policyId, version, comment } = req.body;
 
     let existingApproval;
 
-    if (simulationId) {
+    if (approvalId) {
+      existingApproval = await PolicyApproval.findById(approvalId);
+    } else if (simulationId) {
       existingApproval = await PolicyApproval.findOne({ simulationId });
     } else if (policyId && version !== undefined) {
       existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "PENDING" });
@@ -44,6 +46,7 @@ export async function approveSimulation(
     }
 
     const approval = await decideApproval({
+      approvalId: existingApproval._id.toString(),
       simulationId: existingApproval.simulationId,
       actorRole: mapRoleToApprovalActor(req.user.role),
       decision: "APPROVE",
@@ -61,11 +64,13 @@ export async function rejectSimulation(
   res: Response
 ) {
   try {
-    const { simulationId, policyId, version, comment } = req.body;
+    const { approvalId, simulationId, policyId, version, comment } = req.body;
 
     let existingApproval;
 
-    if (simulationId) {
+    if (approvalId) {
+      existingApproval = await PolicyApproval.findById(approvalId);
+    } else if (simulationId) {
       existingApproval = await PolicyApproval.findOne({ simulationId });
     } else if (policyId && version !== undefined) {
       existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "PENDING" });
@@ -79,6 +84,7 @@ export async function rejectSimulation(
     }
 
     const approval = await decideApproval({
+      approvalId: existingApproval._id.toString(),
       simulationId: existingApproval.simulationId,
       actorRole: mapRoleToApprovalActor(req.user.role),
       decision: "REJECT",

@@ -47,14 +47,20 @@ import { recordApprovalDecision } from "../../observability";
 import { PolicyVersion } from "../policy-versioning/policyVersion.model";
 
 export async function decideApproval(input: {
-  simulationId: string;
+  approvalId?: string;
+  simulationId?: string;
   actorRole: ApprovalActorRole;
   decision: "APPROVE" | "REJECT";
   comment?: string;
 }) {
-  const approval = await PolicyApproval.findOne({
-    simulationId: input.simulationId,
-  });
+  let approval;
+  if (input.approvalId) {
+    approval = await PolicyApproval.findById(input.approvalId);
+  } else if (input.simulationId) {
+    approval = await PolicyApproval.findOne({
+      simulationId: input.simulationId,
+    });
+  }
 
   if (!approval) {
     throw new Error("Approval record not found");
