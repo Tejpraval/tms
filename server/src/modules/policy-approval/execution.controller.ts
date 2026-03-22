@@ -15,9 +15,14 @@ export async function executePolicy(
     let existingApproval;
 
     if (simulationId) {
-      existingApproval = await PolicyApproval.findOne({ simulationId });
+      existingApproval = await PolicyApproval.findOne({ simulationId }).sort({ createdAt: -1 });
     } else if (policyId && version !== undefined) {
-      existingApproval = await PolicyApproval.findOne({ policy: policyId, version, status: "APPROVED" });
+      existingApproval = await PolicyApproval.findOne({ 
+        policy: policyId, 
+        version, 
+        status: "APPROVED",
+        executedAt: { $exists: false }
+      }).sort({ createdAt: -1 });
     }
     if (!existingApproval) {
       return res.status(404).json({ message: "Approval not found" });

@@ -84,13 +84,16 @@ const ApprovalConsolePage = () => {
 
 // Extracted Row Component to handle individual Diff fetches organically
 const ApprovalRow = ({ approval, isExpanded, onToggle, onApprove, onReject }: any) => {
-  // If baseVersion is null, infer this is the very first version ever created
-  const baseV = approval.metadata?.baseVersion ?? 0;
-  const candidateV = approval.metadata?.version ?? 0;
-  const policyId = approval.metadata?.policyId;
+  const candidateV = approval.version || approval.metadata?.version || 0;
+  // Fall back to candidateV - 1 if baseVersion is completely untracked
+  const baseV = approval.policy?.activeVersion || (candidateV > 1 ? candidateV - 1 : 0);
+  
+  const policyObj = approval.policy;
+  const policyId = policyObj && typeof policyObj === 'object' ? policyObj.policyId : (approval.metadata?.policyId || policyObj || 'Unknown');
+  const policyObjectId = policyObj && typeof policyObj === 'object' ? policyObj._id : (policyObj || '');
 
   const diffQuery = useVersionDiff(
-    isExpanded && policyId ? policyId : "",
+    isExpanded && policyObjectId ? policyObjectId : "",
     candidateV,
     baseV
   );
@@ -154,7 +157,9 @@ const ApprovalRow = ({ approval, isExpanded, onToggle, onApprove, onReject }: an
                 </div>
               </div>
 
-              {diffQuery.isLoading ? (
+              {baseV === 0 ? (
+                <div className="text-zinc-500 text-sm px-2">Initial policy creation: No prior versions exist to compare.</div>
+              ) : diffQuery.isLoading ? (
                 <div className="text-zinc-500 text-sm animate-pulse">Calculating semantic diffs...</div>
               ) : diffQuery.isError ? (
                 <div className="text-red-400 text-sm">Failed to load diffs natively.</div>

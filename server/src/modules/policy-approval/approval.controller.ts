@@ -107,7 +107,7 @@ export const listPendingApprovals: RequestHandler = async (
     const approvals = await PolicyApproval.find({
       status: "PENDING",
       tenantId: userReq.user?.tenantId,
-    }).lean();
+    }).populate('policy', 'policyId name').lean();
 
     res.json({
       success: true,

@@ -4,13 +4,14 @@ import { VersionTable } from "../../modules/policy-management/components/Version
 import { SimulationResultPanel } from "../../modules/simulation/components/SimulationResultPanel";
 import type { UnifiedSimulationResult } from "../../modules/simulation/types";
 import { ExecutionTimeline } from "../../modules/execution-history";
+import { CreateDraftModal } from "../../modules/policy-versioning/components/CreateDraftModal";
 
 export const PolicyManagementPage: React.FC = () => {
     const [selectedPolicyId, setSelectedPolicyId] = useState<string | null>(null);
     const [simulationResult, setSimulationResult] = useState<UnifiedSimulationResult | null>(null);
     const { data: policiesResponse, isLoading: policiesLoading } = usePolicies();
     const { data: versions, isLoading: versionsLoading } = usePolicyVersions(selectedPolicyId || "");
-    const createDraftMutation = useCreateDraft();
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const policies = policiesResponse?.data || [];
     const activePolicy = policies.find((p: any) => p._id === selectedPolicyId);
@@ -22,10 +23,7 @@ export const PolicyManagementPage: React.FC = () => {
 
     const handleCreateDraft = () => {
         if (selectedPolicyId) {
-            createDraftMutation.mutate({
-                policyId: selectedPolicyId,
-                rules: activePolicy?.tags || {}, // Dummy inject rules
-            });
+            setIsCreateModalOpen(true);
         }
     };
 
@@ -118,10 +116,9 @@ export const PolicyManagementPage: React.FC = () => {
                                         </button>
                                         <button
                                             onClick={handleCreateDraft}
-                                            disabled={createDraftMutation.isPending}
                                             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50 transition-colors"
                                         >
-                                            {createDraftMutation.isPending ? "Creating..." : "Create New Draft"}
+                                            Create New Draft
                                         </button>
                                     </div>
                                 </div>
@@ -152,6 +149,13 @@ export const PolicyManagementPage: React.FC = () => {
                             <div className="mt-8">
                                 <ExecutionTimeline policyId={selectedPolicyId} />
                             </div>
+
+                            {/* Draft Modal */}
+                            <CreateDraftModal 
+                                isOpen={isCreateModalOpen} 
+                                onClose={() => setIsCreateModalOpen(false)} 
+                                policyId={selectedPolicyId} 
+                            />
                         </div>
                     ) : (
                         <div className="h-full min-h-[400px] flex items-center justify-center bg-zinc-900 border border-zinc-800 border-dashed rounded-xl">
